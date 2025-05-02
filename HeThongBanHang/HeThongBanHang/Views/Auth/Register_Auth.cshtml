@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Register_Auth";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body {
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .main-agileinfo {
+        width: 400px;
+        margin: 80px auto;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        padding: 12px 15px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    input[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: #28a745;
+        border: none;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        input[type="submit"]:hover {
+            background: #218838;
+        }
+
+    .bottom-text {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .alert {
+        color: red;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+</style>
+
+<div class="main-agileinfo" id="register-form">
+    <h2>Đăng ký</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert">@TempData["Error"]</div>
+    }
+
+    <form asp-controller="Auth" asp-action="Register_Auth" method="post">
+        <input type="text" name="Username" placeholder="Tên đăng nhập" required />
+        <input type="password" name="Password" placeholder="Mật khẩu" required />
+        <input type="password" name="ConfirmPassword" placeholder="Xác nhận mật khẩu" required />
+        <input type="submit" value="Đăng ký" />
+    </form>
+
+    <div class="bottom-text">
+        <p>Đã có tài khoản? <a asp-controller="Auth" asp-action="Login_Auth">Đăng nhập</a></p>
+    </div>
+</div>
+
+<script>
+     // scroll khi click vào thể loại
+
+           document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            const path = window.location.pathname.toLowerCase();
+            if (path.includes('/auth/register_auth')) {
+                const loginForm = document.getElementById('register-form');
+                if (loginForm) {
+                    loginForm.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }, 500);  // Đợi một chút để chắc chắn DOM đã sẵn sàng
+    });
+</script>

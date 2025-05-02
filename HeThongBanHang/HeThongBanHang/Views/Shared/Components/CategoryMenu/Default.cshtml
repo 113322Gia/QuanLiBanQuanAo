@@ -1,0 +1,17 @@
+﻿@model List<HeThongBanHang.Models.Category>
+
+
+
+
+<div class="category-nav" >
+    <span class="category-header">Categories <i class="fa fa-list"></i></span>
+    <ul class="category-list">
+        @foreach (var category in Model)
+        {
+            <li>
+                <a asp-controller="Home" asp-action="ByCategory" asp-route-id="@category.Id">@category.Name</a>
+            </li>
+        }
+    </ul>
+</div>
+

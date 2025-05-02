@@ -1,0 +1,169 @@
+﻿@model HeThongBanHang.Models.Order
+
+@{
+    ViewData["Title"] = "Hóa đơn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .button-wrapper {
+        display: inline-block;
+        text-align: center;
+    }
+
+        .button-wrapper button,
+        .button-wrapper form {
+            margin: 0 5px;
+        }
+
+</style>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="col-md-12">
+    <div class="section-title">
+        <h2 class="title">invoice information</h2>
+    </div>
+</div>
+<section class="invoice-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            @* <h2 class="fw-bold">HÓA ĐƠN ĐẶT HÀNG</h2> *@
+            <p class="text-muted">Cảm ơn bạn đã tin tưởng mua sắm tại cửa hàng chúng tôi</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Thông tin khách hàng -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-gradient bg-primary text-white">
+                        <i class="mdi mdi-account-circle fs-4 me-2"></i> INFORMATION
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Fullname:</strong> @ViewBag.FullName</p>
+                        <p><strong>Email:</strong> @ViewBag.Email</p>
+                        <p><strong>Address:</strong> @ViewBag.Address</p>
+                        <p><strong>City:</strong> @ViewBag.City</p>
+                        <p><strong>Telephone:</strong> @ViewBag.Tel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mã đơn hàng -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-gradient bg-success text-white">
+                        <i class="mdi mdi-cart fs-4 me-2"></i> OrderId
+                    </div>
+                    <div class="card-body">
+                        <h5 class="text-success">#@Model.Id</h5>
+                        <p><strong>Datetime:</strong>@Model.CreatedAt</p>
+                        <p>
+                            <strong>Status:</strong>
+                            @if (Model.Status == 1)
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                            else if (Model.Status == 3)
+                            {
+                                <span class="badge bg-success">Confirmed</span>
+                            }
+                            else if (Model.Status == 2)
+                            {
+                                <span class="badge bg-danger">Cancel</span>
+                            }
+                            else if (Model.Status == 4)
+                            {
+                                <span class="badge bg-danger">Pass</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            }
+                        </p>
+                        <p><strong>Paymentmethod:</strong>@Model.Payment?.PaymentName</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi tiết đơn hàng -->
+        <div class="card mt-5 border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <i class="mdi mdi-format-list-bulleted fs-4 me-2"></i> ORDER DETAIL
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <img src="@item.Product?.ImageUrl" alt="@item.Product?.Name" class="img-fluid rounded" style="width: 60px;" />
+                                </td>
+                                <td>@item.Product?.Name</td>
+                                <td class="text-center">@item.ProductVariant?.Size</td>
+                                <td class="text-end">@String.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:c0}", item.Product?.Price)</td>
+                                <td class="text-center">@item.Quantity</td>
+                                <td class="text-end">@String.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:c0}", item.Quantity * item.Product?.Price)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="text-end mt-3">
+                    <h5 class="text-danger">Tổng cộng: @String.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:c0}", Model.TotalPrice)</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <div class="button-wrapper">
+                <form asp-action="ConfirmByCustomer" asp-controller="Cart" method="post" style="display: inline-block; margin-right: 10px;">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success">
+                        <i class="mdi mdi-checkbox-marked-circle-outline"></i> Confirm
+                    </button>
+                </form>
+
+                <button type="button" class="btn btn-danger" onclick="confirmCancel()">
+                    <i class="mdi mdi-delete"></i> Cancel
+                </button>
+            </div>
+        </div>
+
+        </div>
+
+        
+</section>
+
+
+<script>
+    // JavaScript xác nhận hủy giỏ hàng
+    function confirmCancel() {
+        var confirmation = confirm("Bạn có chắc chắn muốn hủy giỏ hàng? Tất cả sản phẩm trong giỏ sẽ bị xóa!");
+        if (confirmation) {
+            // Nếu người dùng xác nhận, gửi form để hủy giỏ hàng
+            document.getElementById('clearCartForm').submit();
+        }
+    }
+</script>
+
+<!-- Form hủy giỏ hàng -->
+<form id="clearCartForm" asp-action="ClearCart" asp-controller="Cart" method="post" style="display: none;">
+    <button type="submit" style="display: none;"></button>
+</form>

@@ -1,0 +1,63 @@
+﻿@model List<HeThongBanHang.Models.HistoryInventory>
+@using HeThongBanHang.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "HistoryChange";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        Không có lịch sử thay đổi.
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">History</h4>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="productTable">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Ngày thay đổi</th>
+                            <th class="text-center">Tên sản phẩm</th>
+                            <th class="text-center">Size</th>
+                            <th class="text-center">Loại thay đổi</th>
+                            <th class="text-center">Số lượng thay đổi</th>
+                            <th class="text-center">Số lượng mới</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-center">@(item.ChangeDate.HasValue ? item.ChangeDate.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                                <td class="text-center">@item.Productvariant?.Product?.Name</td>
+                                <td class="text-center">@item.Productvariant?.Size</td>
+                                <td class="text-center">@item.ChangeType</td>
+                                <td class="text-center">@item.QuantityChanged</td>
+                                <td class="text-center">@item.NewQuantity</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <a asp-action="Inventory_Index" class="btn btn-secondary mt-3">Quay lại</a>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+    <script>
+        const dataTable = new simpleDatatables.DataTable("#productTable", {
+            perPage: 10,
+            searchable: true,
+            sortable: true
+
+        });
+    </script>
+    }
+
+}

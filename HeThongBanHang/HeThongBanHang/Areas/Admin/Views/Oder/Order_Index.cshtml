@@ -1,0 +1,120 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using HeThongBanHang.Models
+@{
+    ViewData["Title"] = "Order_Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["NewOrderId"] != null)
+{
+    <div class="alert alert-info">
+        Có hóa đơn mới được tạo: <strong>Mã hóa đơn  @TempData["NewOrderId"]</strong>
+    </div>
+}
+
+
+<form asp-area="Admin" asp-controller="Oder" asp-action="Order_Index" method="get" class="row mb-3">
+    <div class="col-md-3">
+        <input type="date" name="fromDate" class="form-control" placeholder="Từ ngày" />
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="toDate" class="form-control" placeholder="Đến ngày" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="mdi mdi-filter-variant"></i> Lọc
+        </button>
+
+    </div>
+</form>
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Order</h4>
+
+
+        <div class="table-responsive">
+            <table id="productTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-center">Customer</th>
+                        <th class="text-center">Staff</th>
+                        <th class="text-center">Datetime</th>
+                        <th class="text-center">TotalPrice</th>
+                        <th class="text-center">PaymentMethod</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Action</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item.Id </td>
+                            <td class="text-center">
+                                @((item.User != null) ? item.User.Username : "Khách vãng lai")
+                            </td>
+
+                            <td class="text-center">@((item.Employee != null) ? item.Employee.FullName : "chờ xác nhận")</td>
+
+                            <td class="text-center">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-center">@item.TotalPrice</td>
+                            <td class="text-center">@item.Payment?.PaymentName</td>
+
+                            <td class="text-center">
+                                @if (item.Status == 1)
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                                else if (item.Status == 3)
+                                {
+                                    <span class="badge bg-success">Confirmed</span>
+                                }
+                                else if (item.Status == 2)
+                                {
+                                    <span class="badge bg-danger">Cancel</span>
+                                }
+                                else if (item.Status == 4)
+                                {
+                                    <span class="badge bg-info text-dark">Pass</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@item.Status</span>
+                                }
+                            </td>
+
+
+
+                            <td class="text-center">
+                                <a asp-area="Admin" asp-controller="Oder" asp-action="Order_Detail" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Detail</a>
+                                <a asp-area="Admin" asp-controller="Oder" asp-action="Confirm" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Confirm</a>
+
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        const dataTable = new simpleDatatables.DataTable("#productTable", {
+            perPage: 10,
+            searchable: true,
+            sortable: true
+        });
+    </script>
+}

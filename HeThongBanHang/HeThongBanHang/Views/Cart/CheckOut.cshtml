@@ -1,0 +1,247 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using HeThongBanHang.Models
+@model List<CartItem>
+
+@{
+    ViewData["Title"] = "CheckOut";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="col-md-12" id="checkout">
+    <div class="section-title">
+        <h2 class="title">Check out</h2>
+    </div>
+</div>
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <form asp-action="PlaceOrder" asp-controller="Cart" method="post" class="w-100">
+                @Html.AntiForgeryToken()
+
+                <div class="col-md-6">
+                    <div class="billing-details">
+
+                        @{
+                            var customer = ViewBag.CustomerInfo as Customer;
+                        }
+                        <div class="form-group">
+                            <input class="input" type="text" name="fullName"
+                            placeholder="Full Name"
+                            value="@(ViewBag.Customer != null ? ViewBag.Customer.FullName : "")" required>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="input" type="email" name="email"
+                            placeholder="Email"
+                            value="@(ViewBag.Customer != null ? ViewBag.Customer.Email : "")" required>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="input" type="text" name="address"
+                            placeholder="Address"
+                            value="@(ViewBag.Customer != null ? ViewBag.Customer.Address : "")" required>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="input" type="text" name="city"
+                            placeholder="City"
+                            value="@(ViewBag.Customer != null ? ViewBag.Customer.City : "")" required>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="input" type="tel" name="tel"
+                            placeholder="Telephone"
+                            value="@(ViewBag.Customer != null ? ViewBag.Customer.Tel : "")" required>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="shiping-methods">
+                        <div class="section-title">
+                            <h4 class="title">Payment methods</h4>
+                        </div>
+                        @foreach (var payment in ViewBag.PaymentMethod)
+                        {
+                            <div class="input-checkbox">
+                                <input type="radio" name="PaymentId" id="payment-@payment.Id" value="@payment.Id" @(payment.Id == 1 ? "checked" : "")>
+                                <label for="payment-@payment.Id">@payment.PaymentName</label>
+                                @* <div class="caption"> *@
+                                @*     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. *@
+                                @*         <p> *@
+                                @* </div> *@
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="order-summary clearfix">
+                        <div class="section-title">
+                            <h3 class="title">Order Review</h3>
+                        </div>
+                        @* giữ  *@
+                        <table class="shopping-cart-table table">   
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th class="text-center">Name</th>
+                                    <th class="text-center">Size</th>
+                                    <th class="text-center">Price</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-right"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Count; i++)
+                                {
+                                    <tr>
+                                        <td class="thumb">
+                                            <img src="@Model[i].Product?.ImageUrl" alt="@Model[i].Product?.Name" style="width: 50px; height: 50px;" />
+                                        </td>
+                                        <td class="text-center"><strong>@Model[i].Product?.Name</strong></td>
+
+                                        <td class="text-center">
+                                            <span>@Model[i].ProductVariant?.Size</span>
+                                            <input type="hidden" name="cartItems[@i].ProductVariantId" value="@Model[i].ProductVariantId" />
+                                        </td>
+
+
+                                        <td class="text-center">
+                                            <strong>@(Model[i].Product?.Price.ToString("N") ?? "0")</strong>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <input type="hidden" name="cartItems[@i].ProductId" value="@Model[i].ProductId" />
+                                            <input type="number" name="cartItems[@i].Quantity" class="input quantity-input"
+                                                   value="@Model[i].Quantity" min="1"
+                                                   data-productid="@Model[i].ProductId" onchange="updateCart(this)" />
+                                        </td>
+
+                                        <td class="text-center">
+                                            <strong class="primary-color">
+                                                @(Model[i].Quantity * (Model[i].Product?.Price ?? 0))
+                                            </strong>
+                                        </td>
+
+                                        <td class="text-right">
+                                            <button type="button" class="main-btn icon-btn remove-btn" data-productid="@Model[i].ProductId">
+                                                <i class="fa fa-close"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="empty"></th>
+                                    <th>SUBTOTAL</th>
+                                    <th colspan="2">@string.Format("{0:N}", Model.Sum(i => i.Quantity * i.Product.Price))</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="empty"></th>
+                                    <th>SHIPPING</th>
+                                    <td colspan="2">Free Shipping</td>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="empty"></th>
+                                    <th>TOTAL</th>
+                                    <th colspan="2">@string.Format("{0:N}", Model.Sum(i => i.Quantity * i.Product.Price))</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <input type="hidden" name="Status" value="1" />
+
+
+                        <div class="pull-right">
+                            <button type="submit" class="primary-btn">Place Order</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+    // thay đổi sản phẩm trong giỏ hàng
+
+                        function updateCart(inputElement) {
+        var quantity = $(inputElement).val();
+        var productId = $(inputElement).data('productid');
+        var token = $('input[name="__RequestVerificationToken"]').first().val(); // Lấy token từ form chính
+
+        $.ajax({
+            url: '/Cart/UpdateCart',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: token,
+                productId: productId,
+                quantity: quantity
+            },
+            success: function (response) {
+                alert('Giỏ hàng đã được cập nhật!');
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.log("Error:", error);
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            }
+        });
+    }
+
+    // xóa sản phẩm trong giỏ hàng
+    $(document).on('click', '.remove-btn', function () {
+        var button = $(this);
+        var productId = button.data('productid');
+
+        // Hiển thị hộp thoại xác nhận
+        var isConfirmed = confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?");
+
+        if (isConfirmed) {
+            var token = $('input[name="__RequestVerificationToken"]').val(); // Lấy token trong form
+
+            $.ajax({
+                url: '/Cart/RemoveFromCart',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: token, // Gửi token trong body
+                    productId: productId
+                },
+                success: function () {
+                    alert('Đã xóa sản phẩm khỏi giỏ hàng!');
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.log("Remove Error:", error);
+                    alert('Không thể xóa sản phẩm. Vui lòng thử lại.');
+                }
+            });
+        }
+    });
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            const path = window.location.pathname.toLowerCase();
+            if (path.includes('/cart/checkout')) {
+                const loginForm = document.getElementById('checkout');
+                if (loginForm) {
+                    loginForm.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }, 500);  // Đợi một chút để chắc chắn DOM đã sẵn sàng
+    });
+
+
+
+
+</script>
+

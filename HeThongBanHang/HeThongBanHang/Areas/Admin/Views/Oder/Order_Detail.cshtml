@@ -1,0 +1,70 @@
+﻿@model HeThongBanHang.Models.Order
+@{
+    ViewData["Title"] = "Order_Detail";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Customer Info -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Thông tin khách hàng</h5>
+                </div>
+                <div class="card-body">
+                    <p><i class="mdi mdi-account"></i> <strong>FullName:</strong> @Model.Customer?.FullName</p>
+                    <p><i class="mdi mdi-email"></i> <strong>Email:</strong> @Model.Customer?.Email</p>
+                    <p><i class="mdi mdi-map-marker"></i> <strong>Address:</strong> @Model.Customer?.Address</p>
+                    <p><i class="mdi mdi-city"></i> <strong>City:</strong> @Model.Customer?.City</p>
+                    <p><i class="mdi mdi-phone"></i> <strong>Telephon:</strong> @Model.Customer?.Tel</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient-success text-white">
+                    <h5 class="mb-0">Chi tiết đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3"><strong>Mã đơn hàng:</strong> @Model.Id</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Size</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <img src="@item.Product?.ImageUrl" alt="@item.Product?.Name" class="img-fluid" style="width: 50px; height: 50px;" />
+                                        </td>
+                                        <td>@item.Product?.Name</td>
+                                        <td>@item.ProductVariant?.Size</td>
+                                        <td>@String.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:c0}", item.Product?.Price)</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@String.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:c0}", item.Quantity * (item.Product?.Price ?? 0))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <h5><strong>Tổng cộng:</strong> @String.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:c0}", Model.TotalPrice)</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

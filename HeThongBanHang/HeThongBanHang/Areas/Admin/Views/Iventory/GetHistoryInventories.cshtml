@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "GetHistoryInventories";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Inventory</h4>
+
+        <div class="table-responsive">
+            <table id="productTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class=text-center>Id</th>
+                        <th class=text-center>Name</th>
+                        <th class=text-center>Image</th>
+                        <th class=text-center>Size and quantity</th>
+                        <th class=text-center>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class=text-center>@item.Id</td>
+                            <td class=text-center>@item.ProductVariantId.Product.Name</td>
+                            <td class="text-center">
+                                <img src="@item.ImageUrl" style="width: 150px; height: 150px; object-fit: cover;" />
+                            </td>
+                            <td class=text-center>
+                                @item.ChangeType
+                            </td>
+                            <td class=text-center>
+                                @item.ChangeType
+                            </td>
+                            <td class=text-center>
+                                @item.ChangeType
+                            </td>
+                            <td class=text-center>
+                                @item.ChangeType
+                            </td>
+                            @* <td class=text-center>
+                                <a asp-area="Admin" asp-controller="Iventory" asp-action="CreateVariant" asp-route-productId="@product.Id" class="btn btn-sm btn-primary">+ Add</a>
+                                <a asp-area="Admin" asp-controller="Iventory" asp-action="HistoryChange" asp-route-id="@product.Id" class="btn btn-sm btn-info">History changes</a>
+
+                            </td> *@
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const table = document.querySelector("#productTable");
+            const dataTable = new simpleDatatables.DataTable(table, {
+                perPage: 10,
+                searchable: true,
+                sortable: true
+            });
+        });
+
+
+
+
+    </script>
+}
+

@@ -1,0 +1,105 @@
+﻿@model User
+@{
+    ViewData["Title"] = "HistoryOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-md-12" id="history-order">
+    <div class="section-title">
+        <h2 class="title">History order</h2>
+    </div>
+</div>
+
+<!-- Thông tin người dùng -->
+<div class="info" style="margin:10px;">
+    <div>
+        <strong>Fullname:</strong> @Model.Customers?.FullName
+    </div>
+    <div>
+        <strong>Email:</strong> @Model.Customers?.Email
+    </div>
+</div>
+
+<!-- Bảng Lịch sử đơn hàng -->
+<table class="table table-striped table-bordered table-hover" id="historyOrderTable">
+    <thead>
+        <tr>
+            <th class="text-center">#</th>
+            <th class="text-center">Datetime</th>
+            <th class="text-center">Total</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Detail</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int orderNumber = 1;
+        }
+        @foreach (var order in Model.Orders)
+        {
+            <tr>
+                <td class="text-center">@orderNumber</td>
+                <td class="text-center">@String.Format("{0:dd/MM/yyyy HH:mm}", order.CreatedAt)</td>
+                <td class="text-center">@String.Format("{0:N2}", order.TotalPrice) VND</td>
+                <td class="text-center">
+                    @if (order.Status == 1)
+                    {
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    }
+                    else if (order.Status == 3)
+                    {
+                        <span class="badge bg-success">Confirmed</span>
+                    }
+                    else if (order.Status == 2)
+                    {
+                        <span class="badge bg-danger">Cancel</span>
+                    }
+                    else if (order.Status == 4)
+                    {
+                        <span class="badge bg-primary">Pass</span>
+                    }
+                </td>
+                <td class="text-center">
+                    <a asp-action="ViewInvoice" asp-controller="Cart" asp-route-orderId="@order.Id" class="btn btn-info">Detail</a>
+                </td>
+            </tr>
+            orderNumber++;
+        }
+    </tbody>
+</table>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+<script>
+        var $j = jQuery.noConflict();
+    $j(document).ready(function() {
+        $j('#historyOrderTable').DataTable({
+            "paging": true, // Bật phân trang
+            "searching": true, // Bật tìm kiếm
+            "ordering": true, // Bật sắp xếp cột
+            "info": true, // Hiển thị thông tin phân trang
+            "lengthChange": false, // Không cho phép thay đổi số lượng hiển thị mỗi trang
+        });
+    });
+
+
+
+     // scroll khi click vào thể loại
+
+           document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            const path = window.location.pathname.toLowerCase();
+            if (path.includes('/user/historyorder/')) {
+                const loginForm = document.getElementById('history-order');
+                if (loginForm) {
+                    loginForm.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }, 500);  // Đợi một chút để chắc chắn DOM đã sẵn sàng
+    });
+</script>
+

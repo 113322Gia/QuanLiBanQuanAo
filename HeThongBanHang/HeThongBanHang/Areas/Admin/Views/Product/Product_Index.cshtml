@@ -1,0 +1,85 @@
+﻿@using HeThongBanHang.Models
+@model List<HeThongBanHang.Models.Product>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Product_Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+
+
+<a class="btn btn-primary" asp-area="Admin" asp-controller="Product" asp-action="CreateProduct">
+    <i class="mdi mdi-plus"></i> Create Product
+</a>
+
+
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Table with contextual classes</h4>
+        <p class="card-description">
+            Add class <code>.table-{color}</code>
+        </p>
+
+        <div class="table-responsive">
+
+            <table id="productTable" class="table table-bordered table-striped">
+                
+                <thead>
+                    <tr>
+                        <th> # </th>
+                        <th> Name </th>
+                        <th> Category </th>
+                        <th> Image </th>
+                        <th> Price </th>                       
+                        <th> Action </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Name</td>
+                            <td>@item.Category.Name</td>
+                            <td class="text-center">
+                                <img src="@item.ImageUrl" style="width: 150px; height: 150px; object-fit: cover;" />
+                            </td>
+                            <td>@item.Price</td>
+                           
+
+                            <td>
+                                <a asp-area="Admin" asp-controller="Product" asp-action="EditProduct" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                                <form asp-area="Admin" asp-controller="Product" asp-action="DeleteProduct" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div> <!-- KẾT THÚC table-responsive -->
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const dataTable = new simpleDatatables.DataTable("#productTable", {
+            perPage: 10,
+            searchable: true,
+            sortable: true
+        });
+    </script>
+}
