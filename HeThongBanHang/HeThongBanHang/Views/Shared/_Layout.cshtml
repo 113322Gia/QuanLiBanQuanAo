@@ -75,6 +75,7 @@
 <body>
 	<!-- HEADER -->
 	<header>
+
 		<!-- top Header -->
 		<div id="top-header">
 			<div class="container">
@@ -236,8 +237,10 @@
 		<!-- container -->
 		<div class="container">
 			<div id="responsive-nav">
+				<div class="category-nav">
 				<!-- Menu Category --> 
 				@await Component.InvokeAsync("CategoryMenu")
+				</div>
 				<!-- /category nav -->
 				<!-- menu nav -->
 				<div class="menu-nav">
@@ -607,7 +610,7 @@
 	<!-- /FOOTER -->
 	<!-- jQuery Plugins -->
 
-	
+
 	<script src="@Url.Content("~/UserCss/js/jquery.min.js")"></script>
 	<script src="@Url.Content("~/UserCss/js/bootstrap.min.js")"></script>
 	<script src="@Url.Content("~/UserCss/js/slick.min.js")"></script>
@@ -616,7 +619,7 @@
 	<script src="@Url.Content("~/UserCss/js/main.js")"></script>
 
 	
-
+	
 
 </body>
 

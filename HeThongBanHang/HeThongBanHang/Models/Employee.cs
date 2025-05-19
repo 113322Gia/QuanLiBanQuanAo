@@ -17,8 +17,9 @@ public partial class Employee
 
     public string Role { get; set; } = null!;
 
-
-   
+    public int? CustomerEmployeeId { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual CustomerEmployee? CustomerEmployee { get; set; }
 }

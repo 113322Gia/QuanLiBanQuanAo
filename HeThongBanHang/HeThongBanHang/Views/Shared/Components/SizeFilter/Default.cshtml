@@ -1,0 +1,18 @@
+﻿@model List<string>
+@{
+    var selectedSizes = ViewBag.SelectedSizes as List<string> ?? new List<string>();
+}
+
+
+<ul class="filter-menu">
+    @foreach (var size in Model)
+    {
+        <li>
+            <label>
+                <input type="checkbox" name="sizes" value="@size"
+                @(selectedSizes.Contains(size) ? "checked" : "") />
+                @size
+            </label>
+        </li>
+    }
+</ul>

@@ -73,7 +73,10 @@
     {
         <div class="alert">@TempData["Error"]</div>
     }
-
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert">@TempData["SuccessMessage"]</div>
+    }
     <form asp-controller="Auth" asp-action="Login_Auth" method="post">
         <input type="text" name="Username" placeholder="Username" required />
         <input type="password" name="Password" placeholder="Mật khẩu" required />

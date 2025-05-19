@@ -56,6 +56,7 @@ namespace HeThongBanHang.Areas.Admin.Controllers
                 Username = Username,
                 PasswordHash = hashedPassword,
                 Role = Role,
+                IsDeleted = false
             };
             _DbContext.Employees.Add(employee);
             _DbContext.SaveChanges();

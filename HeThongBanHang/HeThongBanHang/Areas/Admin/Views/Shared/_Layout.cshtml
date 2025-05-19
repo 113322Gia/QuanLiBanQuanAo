@@ -10,6 +10,11 @@
     <title>Purple Admin</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" />
+    <!-- Thêm vào trong <head> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    
 
     <link rel="stylesheet" href="~/AdminCss/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="~/AdminCss/assets/vendors/css/vendor.bundle.base.css">
@@ -235,8 +240,21 @@
                                 <li class="nav-item">
                                     <a class="nav-link"
                                        asp-area="Admin"
+                                       asp-controller="Import" asp-action="Import_Index">
+                                        InventoryImport
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-area="Admin"
                                        asp-controller="Iventory" asp-action="Inventory_Index">
                                         Inventory
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-area="Admin" asp-controller="Category" asp-action="CateGories_Index">
+                                        Categories
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -249,10 +267,14 @@
                                     <a class="nav-link"
                                        asp-area="Admin" asp-controller="Oder" asp-action="Order_Index">Order</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-area="Admin" asp-controller="Employee" asp-action="Employee_Index">Staff</a>
+                                </li>
                             </ul>
                         </div>
                     </li>
-                    <li class="nav-item">
+                   @*  <li class="nav-item">
                         <a class="nav-link" href="pages/icons/mdi.html">
                             <span class="menu-title">Icons</span>
                             <i class="mdi mdi-contacts menu-icon"></i>
@@ -291,8 +313,8 @@
                                 <li class="nav-item"> <a class="nav-link" href="pages/samples/error-500.html"> 500 </a></li>
                             </ul>
                         </div>
-                    </li>
-                    <li class="nav-item sidebar-actions">
+                    </li> *@
+                    @* <li class="nav-item sidebar-actions">
                         <span class="nav-link">
                             <div class="border-bottom">
                                 <h6 class="font-weight-normal mb-3">Projects</h6>
@@ -308,10 +330,10 @@
                                 </ul>
                             </div>
                         </span>
-                    </li>
+                    </li> *@
                 </ul>
             </nav>
-
+            
             <!-- partial -->
             <div class="main-panel">
                 <div class="content-wrapper">
@@ -323,11 +345,14 @@
             </div>
             <!-- container-scroller -->
             <!-- plugins:js -->
-            <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+             <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+            <!-- Thêm vào trước </body> -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script> *@
             @RenderSection("Scripts", required: false)
 
             <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script> 
             <script src="~/AdminCss/assets/vendors/js/vendor.bundle.base.js"></script>
             <!-- endinject -->
             <!-- Plugin js for this page -->
@@ -343,12 +368,6 @@
             <script src="~/AdminCss/assets/js/dashboard.js"></script>
             <script src="~/AdminCss/assets/js/todolist.js"></script>
             <!-- End custom js for this page -->
-
-
-
-
-
-
-
+            
 </body>
 </html>

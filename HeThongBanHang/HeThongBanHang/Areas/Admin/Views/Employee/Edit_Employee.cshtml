@@ -1,0 +1,80 @@
+﻿@model HeThongBanHang.Models.Employee
+
+@{
+    ViewData["Title"] = "Edit Employee";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Edit Employee</h4>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+
+        <form asp-action="Edit_Employee" asp-controller="Employee" method="post" class="form-horizontal">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group row">
+                <label for="FullName" class="col-md-3 col-form-label">Full Name</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="FullName" name="FullName" value="@Model.FullName" required />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Username" class="col-md-3 col-form-label">Username</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="Username" name="Username" value="@Model.Username" readonly />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Role" class="col-md-3 col-form-label">Role</label>
+                <div class="col-md-9">
+                    <select class="form-control" id="Role" name="Role">
+                        <option value="Admin" @(Model.Role == "Admin" ? "selected" : "")>Admin</option>
+                        <option value="Employee" @(Model.Role == "Employee" ? "selected" : "")>Employee</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Email" class="col-md-3 col-form-label">Email</label>
+                <div class="col-md-9">
+                    <input type="email" class="form-control" id="Email" name="CustomerEmployee.Email" value="@Model.CustomerEmployee?.Email" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Phone" class="col-md-3 col-form-label">Phone</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="Phone" name="CustomerEmployee.Phone" value="@Model.CustomerEmployee?.Phone" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="IsDeleted" class="col-md-3 col-form-label">Status</label>
+                <div class="col-md-9">
+                    <select class="form-control" name="IsDeleted" id="IsDeleted">
+                        <option value="false" @(Model.IsDeleted ? "" : "selected")>Đang làm</option>
+                        <option value="true" @(Model.IsDeleted ? "selected" : "")>Nghỉ việc</option>
+                    </select>
+                </div>
+            </div>
+
+
+
+            <div class="form-group row">
+                <div class="col-md-9 offset-md-3">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

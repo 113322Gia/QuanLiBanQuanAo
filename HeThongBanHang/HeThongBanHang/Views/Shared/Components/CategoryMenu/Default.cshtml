@@ -1,17 +1,52 @@
-﻿@model List<HeThongBanHang.Models.Category>
+﻿@model List<HeThongBanHang.Models.ObjectType>
 
 
+<style>
+    .custom-menu {
+        width: fit-content; /* Chiều ngang vừa đủ nội dung */
+        max-width: 300px; /* Không vượt quá 300px chiều ngang */
+        max-height: 400px; /* Giới hạn chiều cao */
+        overflow-y: auto; /* Bật thanh cuộn dọc khi cần */
+        padding: 15px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        border-radius: 4px;
+        z-index: 1000;
+    }
 
 
-<div class="category-nav" >
-    <span class="category-header">Categories <i class="fa fa-list"></i></span>
-    <ul class="category-list">
-        @foreach (var category in Model)
-        {
-            <li>
-                <a asp-controller="Home" asp-action="ByCategory" asp-route-id="@category.Id">@category.Name</a>
-            </li>
-        }
-    </ul>
+</style>
+
+
+<div id="responsive-nav">
+    <!-- category nav -->
+    <div class="category-nav">
+        <span class="category-header">Categories <i class="fa fa-list"></i></span>
+        <ul class="category-list">
+            @foreach (var objectType in Model)
+            {
+                <li class="dropdown side-dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                        @objectType.Name <i class="fa fa-angle-right"></i>
+                    </a>
+                    <div class="custom-menu">
+                        <div>
+                            <ul class="list-links">
+                                <li><h3 class="list-links-title">Categories</h3></li>
+                                @foreach (var category in objectType.Categories)
+                                {
+                                    <li>
+                                        <a asp-controller="Home" asp-action="ByCategory" asp-route-id="@category.Id">
+                                            @category.Name
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+
+                </li>
+            }
+        </ul>
+    </div>
 </div>
-

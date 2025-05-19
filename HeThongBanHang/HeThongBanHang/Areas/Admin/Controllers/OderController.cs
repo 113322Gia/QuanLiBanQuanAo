@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HeThongBanHang.Areas.Admin.Controllers
 {
@@ -19,10 +20,10 @@ namespace HeThongBanHang.Areas.Admin.Controllers
             return View();
         }
 
-        public IActionResult Order_Index(DateTime? fromDate, DateTime? toDate)
+        public IActionResult Order_Index(DateTime? fromDate, DateTime? toDate, string filter)
         {
-            // kiểm tra ngày
-            if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
+            // Kiểm tra điều kiện ngày
+            if (fromDate > toDate)
             {
                 TempData["ErrorMessage"] = "Ngày bắt đầu không được lớn hơn ngày kết thúc.";
                 return RedirectToAction("Order_Index");
@@ -34,38 +35,48 @@ namespace HeThongBanHang.Areas.Admin.Controllers
                 .Include(o => o.Payment)
                 .AsQueryable();
 
-            if (fromDate.HasValue && toDate.HasValue)
+            // Lọc theo filter nhanh
+            switch (filter)
             {
-                var startDate = fromDate.Value.Date;
-                var endDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                case "today":
+                    var today = DateTime.Today;
+                    ordersQuery = ordersQuery.Where(x => x.CreatedAt.HasValue && x.CreatedAt.Value.Date == today);
+                    break;
+
+                case "last7days":
+                    var last7Days = DateTime.Today.AddDays(-7);
+                    ordersQuery = ordersQuery.Where(x => x.CreatedAt >= last7Days);
+                    break;
+
+                case "thismonth":
+                    var startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                    ordersQuery = ordersQuery.Where(x => x.CreatedAt >= startOfMonth);
+                    break;
+            }
+
+
+            // Lọc theo ngày cụ thể
+            if (fromDate.HasValue || toDate.HasValue)
+            {
+                var startDate = fromDate?.Date ?? DateTime.MinValue;
+                var endDate = (toDate?.Date.AddDays(1).AddTicks(-1)) ?? DateTime.MaxValue;
                 ordersQuery = ordersQuery.Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate);
-            }
-            if (fromDate.HasValue && !toDate.HasValue)
-            {
-                var date = fromDate.Value.Date;
-                var nextDate = date.AddDays(1);
-                ordersQuery = ordersQuery.Where(o => o.CreatedAt >= date && o.CreatedAt < nextDate);
-            }
-            else if (!fromDate.HasValue && toDate.HasValue)
-            {
-                var date = toDate.Value.Date;
-                var nextDate = date.AddDays(1);
-                ordersQuery = ordersQuery.Where(o => o.CreatedAt >= date && o.CreatedAt < nextDate);
             }
 
             var orderList = ordersQuery
                 .OrderByDescending(o => o.CreatedAt)
-                .Take(50)  // Giới hạn kết quả
+                .Take(50)
                 .ToList();
-            // kiểm tra nếu orderlist có 0 phần tử
-            if(orderList.Count == 0) // count đại diện cho số nguyên
+
+            if (!orderList.Any())
             {
                 TempData["ErrorMessage"] = "Không có đơn hàng nào trong khoảng thời gian này.";
                 return RedirectToAction("Order_Index");
             }
-            
+
             return View(orderList);
         }
+
 
         public IActionResult Order_Detail(int id)
         {
@@ -114,6 +125,11 @@ namespace HeThongBanHang.Areas.Admin.Controllers
             {
                 return RedirectToAction("Login", "Accout"); // hoặc chuyển về trang đăng nhập
             }
+            if (order.Status == 1)
+            {
+                TempData["ErrorMessage"] = "Đơn hàng chưa được khách hàng xác nhận";
+                return RedirectToAction("Order_Index");
+            }
             if (order.Status == 2)
             {
                 TempData["ErrorMessage"] = "Đơn hàng đã được hủy trước đó";
@@ -123,7 +139,7 @@ namespace HeThongBanHang.Areas.Admin.Controllers
             {
                 order.Status = 3; // Đã xác nhận
                 order.EmployeeId = employeeId.Value;
-                TempData["SuccessMessage"] = "Xác nhận thành công";
+                TempData["SuccessMessage"] = $"Xác nhận thành công #{order.Id}";
 
                 _DbContext.SaveChanges();
             }

@@ -21,20 +21,31 @@
 }
 
 
-<form asp-area="Admin" asp-controller="Oder" asp-action="Order_Index" method="get" class="row mb-3">
-    <div class="col-md-3">
-        <input type="date" name="fromDate" class="form-control" placeholder="Từ ngày" />
+<form asp-area="Admin" asp-controller="Oder" asp-action="Order_Index" method="get" class="row g-3 align-items-end mb-4 p-3 rounded shadow-sm bg-light">
+    <div class="col-md-5">
+        <label for="fromDate" class="form-label fw-semibold">Từ ngày</label>
+        <input type="date" name="fromDate" id="fromDate" class="form-control rounded-pill" required>
     </div>
-    <div class="col-md-3">
-        <input type="date" name="toDate" class="form-control" placeholder="Đến ngày" />
+    <div class="col-md-5">
+        <label for="toDate" class="form-label fw-semibold">Đến ngày</label>
+        <input type="date" name="toDate" id="toDate" class="form-control rounded-pill" required>
     </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary">
-            <i class="mdi mdi-filter-variant"></i> Lọc
+    <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary rounded-pill">
+            <i class="mdi mdi-filter-variant me-2"></i> Lọc
         </button>
-
     </div>
 </form>
+<!-- Đặt các checkbox vào một row riêng biệt để chúng luôn hiển thị trên cùng một dòng -->
+<div class="custom-dropdown mb-4">
+    <select class="form-select w-auto px-3 py-2 rounded-pill border-primary" id="quickFilterSelect">
+        @*  dùng w-auto để dropdown không bị rộng *@
+        <option selected disabled hidden>Fast filtering</option>
+        <option value="@Url.Action("Order_Index", new { filter = "today" })">Hôm nay</option>
+        <option value="@Url.Action("Order_Index", new { filter = "last7days" })">7 ngày gần nhất</option>
+        <option value="@Url.Action("Order_Index", new { filter = "thismonth" })">Tháng này</option>
+    </select>
+</div>
 
 <div class="card">
     <div class="card-body">
@@ -115,6 +126,14 @@
             perPage: 10,
             searchable: true,
             sortable: true
+        });
+
+        // JS lọc cho dropdown
+                    document.getElementById('quickFilterSelect').addEventListener('change', function () {
+            const url = this.value;
+            if (url) {
+                window.location.href = url;
+            }
         });
     </script>
 }

@@ -1,0 +1,90 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using HeThongBanHang.Models
+@{
+    ViewData["Title"] = "Employee Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title mb-4">Employee List</h4>
+
+        <div class="table-responsive">
+            <table id="employeeTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-center">Full Name</th>
+                        <th class="text-center">Account Name</th>
+                        <th class="text-center">Role</th>
+                        <th class="text-center">Email</th>
+                        <th class="text-center">Phone</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item.Id</td>
+                            <td class="text-center">@item.FullName</td>
+                            <td class="text-center">@item.Username</td>
+                            <td class="text-center">@item.Role</td>
+                            <td class="text-center">@((item.CustomerEmployee != null) ? item.CustomerEmployee.Email :" no data" )</td>
+                            <td class="text-center">@((item.CustomerEmployee != null) ? item.CustomerEmployee.Phone : " no data")</td>
+                            <td class="text-center">
+                                @if (item.IsDeleted)
+                                {
+                                    <span class="badge bg-danger">Đã nghỉ</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Đang làm</span>
+                                }
+                            </td>
+
+
+                            <td class="text-center">
+                                <a asp-area="Admin" asp-controller="Employee" asp-action="Edit_Employee" asp-route-id="@item.Id" class="btn btn-sm btn-primary me-1">
+                                    <i class="mdi mdi-pencil"></i> Edit
+                                </a>
+                                <form asp-area="Admin" asp-controller="Employee" asp-action="Delete_Employee" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const dataTable = new simpleDatatables.DataTable("#employeeTable", {
+            perPage: 10,
+            searchable: true,
+            sortable: true,
+            labels: {
+                placeholder: "Search...",
+                perPage: "{select} entries per page",
+                noRows: "No employees found",
+                info: "Showing {start} to {end} of {rows} entries"
+            }
+        });
+
+       
+    </script>
+}

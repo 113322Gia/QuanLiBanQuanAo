@@ -389,7 +389,6 @@ namespace HeThongBanHang.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Kiểm tra nếu đơn hàng đã được xác nhận (Status == 3)
             if (order.Status == 3)
             {
                 TempData["ErrorMessage"] = "Đơn hàng này đã được xác nhận, không thể hủy.";

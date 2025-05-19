@@ -1,0 +1,20 @@
+﻿@model List<HeThongBanHang.Models.Category>
+@{
+    var selectedCategoryIds = ViewBag.SelectedCategoryIds as List<int> ?? new List<int>();
+}
+
+<!-- Dropdown: CATEGORY -->
+<ul class="filter-menu">
+    @foreach (var category in Model)
+    {
+        <li>
+            <label>
+                <input type="checkbox" name="categoryIds" value="@category.Id"
+                @(selectedCategoryIds.Contains(category.Id) ? "checked" : "") />
+                @category.Name
+            </label>
+        </li>
+
+    }
+</ul>
+

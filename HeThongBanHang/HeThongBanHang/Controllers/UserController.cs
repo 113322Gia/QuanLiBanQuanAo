@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Bcpg;
 
 namespace HeThongBanHang.Controllers
 {
@@ -128,6 +129,63 @@ namespace HeThongBanHang.Controllers
 
             return View(user);
         }
+
+        [HttpPost]
+        public IActionResult Toggle([FromBody] int productId)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return Unauthorized(new { success = false, message = "Bạn cần đăng nhập để thực hiện hành động này." });
+            }
+
+            var productExists = _DbContext.Products.Any(p => p.Id == productId);
+            if (!productExists)
+            {
+                return BadRequest(new { success = false, message = "Sản phẩm không tồn tại." });
+            }
+
+            var favorite = _DbContext.Favorite.FirstOrDefault(f => f.UserId == userId && f.ProductId == productId);
+
+            bool isFavoritedNow = false;
+
+            try
+            {
+                if (favorite == null)
+                {
+                    // Nếu chưa có, tạo mới bản ghi Favorite
+                    var newFavorite = new Favorite
+                    {
+                        UserId = userId.Value,
+                        ProductId = productId
+                    };
+                    _DbContext.Favorite.Add(newFavorite);
+                    isFavoritedNow = true;
+                }
+                else
+                {
+                    // Nếu đã có, xóa đi (bỏ yêu thích)
+                    _DbContext.Favorite.Remove(favorite);
+                    isFavoritedNow = false;
+                }
+
+                _DbContext.SaveChanges();
+
+                return Ok(new { success = true, isFavorited = isFavoritedNow });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = $"Đã xảy ra lỗi: {ex.Message}" });
+            }
+        }
+
+
+
+
+
+
+
+
 
     }
 }

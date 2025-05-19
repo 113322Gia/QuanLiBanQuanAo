@@ -1,0 +1,227 @@
+﻿@using HeThongBanHang.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+<style>
+    .modal .form-control {
+        height: 40px;
+        padding: 8px 12px;
+        font-size: 1rem;
+        line-height: 1.5;
+        border-radius: 8px;
+    }
+
+
+        .modal .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+        }
+
+
+
+    .modal-footer .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        transition: background-color 0.3s ease;
+    }
+
+        .modal-footer .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+</style>
+
+@{
+    ViewData["Title"] = "Category_Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+<!-- Button trigger modal -->
+
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">CATEGORY</h4>
+        <div class="table-responsive">
+            <div class="d-flex justify-content-start mb-3">
+                <button type="button" class="btn btn-outline-success btn-sm px-3 py-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <i class="bi bi-plus-circle"></i> Add Category
+                </button>
+            </div>
+            <table class="table table-striped table-bordered" id="categoryTable">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-center">Category</th>
+                        <th class="text-center">CategoryName</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item.Id</td>
+                            <td class="text-center">@item.ObjectType?.Name</td>  @* dùng ? tránh lỗi NULL *@
+
+                            <td class="text-center">@item.Name</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-success btn-edit-category"
+                                        data-id="@item.Id"
+                                        data-name="@item.Name"
+                                        data-objecttypeid="@item.ObjectTypeId">
+                                    Edit
+                                </button>
+
+
+
+                                <button type="button"
+                                        class="btn btn-sm btn-danger btn-delete-category"
+                                        data-id="@item.Id">
+                                    Delete
+                                </button>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Modal create -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Create categories</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-area="Admin" asp-controller="Category" asp-action="Create_Catgories" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="col-form-label">CategoryName:</label>
+                        <input type="text" class="form-control" name="Name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ObjectTypeId" class="form-label">Object</label>
+                        <select class="form-control" name="ObjectTypeId" id="create-objectTypeId">
+                            <option value="">-- Chọn loại --</option>
+                            @foreach (var item in (List<SelectListItem>)ViewBag.ObjectTypes)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal edit -->
+<div class="modal fade" id="EditModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Edit categories</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-area="Admin" asp-controller="Category" asp-action="Edit_Catgories" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" id="edit-id" />
+                    <div class="mb-3">
+                        <label class="col-form-label">Category Name:</label>
+                        <input type="text" class="form-control" name="Name" id="edit-name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ObjectTypeId" class="form-label">Object</label>
+                        <select class="form-control" name="ObjectTypeId" id="edit-objectTypeId">
+                            <option value="">-- Chọn loại --</option>
+                            @foreach (var item in (List<SelectListItem>)ViewBag.ObjectTypes)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Khởi tạo DataTable
+            const dataTable = new simpleDatatables.DataTable("#categoryTable", {
+                perPage: 10,
+                searchable: true,
+                sortable: true
+            });
+
+            // Đoạn script đổ dữ liệu vào modal để edit
+            $(document).on('click', '.btn-edit-category', function () {
+                let id = $(this).data('id');
+                let name = $(this).data('name');
+                let objectTypeId = $(this).data('objecttypeid');
+
+                $('#edit-id').val(id);
+                $('#edit-name').val(name);
+                $('#edit-objectTypeId').val(objectTypeId); // Gán đúng giá trị vào select
+                $('#EditModal').modal('show');
+            });
+
+            // Đoạn script xóa
+            $(document).on('click', '.btn-delete-category', function () {
+                const id = $(this).data('id');
+                const row = $(this).closest('tr');
+
+                if (!id) {
+                    alert("Không tìm thấy ID của thể loại.");
+                    return;
+                }
+
+                if (!confirm("Bạn có chắc muốn xóa thể loại này không?")) return;
+
+                $.ajax({
+                    url: '/Admin/Category/Delete_Categories',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        if (response.success) {
+                            row.remove();
+                            alert("Xóa thành công!");
+                        } else {
+                            alert(response.message || "Không thể xóa thể loại.");
+                        }
+                    },
+                    error: function (xhr) {
+                        const msg = xhr.responseText || "Lỗi hệ thống, vui lòng thử lại.";
+                        alert(msg);
+                    }
+                });
+            });
+        });
+    </script>
+}
+

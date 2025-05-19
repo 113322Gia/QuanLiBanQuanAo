@@ -14,7 +14,9 @@ namespace HeThongBanHang.ViewComponents
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var categories =await _DbContext.Categories.ToListAsync();
+            var categories =await _DbContext.ObjectType
+                .Include(x => x.Categories)
+                .ToListAsync();
             return View(categories);
         }
     }

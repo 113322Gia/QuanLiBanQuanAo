@@ -17,18 +17,20 @@
 
 
 
-<a class="btn btn-primary" asp-area="Admin" asp-controller="Product" asp-action="CreateProduct">
-    <i class="mdi mdi-plus"></i> Create Product
-</a>
+
 
 
 
 <div class="card">
     <div class="card-body">
-        <h4 class="card-title">Table with contextual classes</h4>
-        <p class="card-description">
-            Add class <code>.table-{color}</code>
-        </p>
+        
+        <!-- Dùng Bootstrap Icons -->
+        <div class="d-flex justify-content-start mb-3">
+            <a class="btn btn-outline-success btn-sm px-3 py-2" asp-area="Admin" asp-controller="Product" asp-action="CreateProduct">
+                <i class="bi bi-plus-circle"></i> Create Product
+            </a>
+        </div>
+
 
         <div class="table-responsive">
 

@@ -36,6 +36,10 @@ public partial class QuanLiBanQuanAoContext : DbContext
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Payment> Payment { get; set; }
     public virtual DbSet<HistoryInventory> HistoryInventory { get; set; }
+    public virtual DbSet<CustomerEmployee> CustomerEmployee { get; set; }
+    public virtual DbSet<Favorite> Favorite { get; set; }
+    public virtual DbSet<InventoryImport> InventoryImports { get; set; }
+    public virtual DbSet<ObjectType> ObjectType { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -56,6 +60,19 @@ public partial class QuanLiBanQuanAoContext : DbContext
                 .HasConstraintName("FK__Carts__UserId__300424B4");
         });
 
+        modelBuilder.Entity<Favorite>()
+    .HasOne(f => f.User)
+    .WithMany()  // Mối quan hệ giữa User và Favorites
+    .HasForeignKey(f => f.UserId)
+    .OnDelete(DeleteBehavior.Cascade);  // Khi xóa User, Favorites sẽ bị xóa theo
+
+        modelBuilder.Entity<Favorite>()
+            .HasOne(f => f.Product)
+            .WithMany()  // Mối quan hệ giữa Product và Favorites
+            .HasForeignKey(f => f.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);  // Khi xóa Product, Favorites sẽ bị xóa theo
+
+
         modelBuilder.Entity<CartItem>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__CartItem__3214EC076E442244");
@@ -75,6 +92,12 @@ public partial class QuanLiBanQuanAoContext : DbContext
 
             entity.Property(e => e.Name).HasMaxLength(100);
         });
+        modelBuilder.Entity<CustomerEmployee>()
+        .HasOne(ce => ce.Employee)
+        .WithOne(e => e.CustomerEmployee)
+        .HasForeignKey<Employee>(e => e.CustomerEmployeeId)
+        .OnDelete(DeleteBehavior.Cascade);  // Khi xóa Employee, xóa luôn CustomerEmployee
+
 
         modelBuilder.Entity<Employee>(entity =>
         {
@@ -86,6 +109,10 @@ public partial class QuanLiBanQuanAoContext : DbContext
                 .HasMaxLength(50)
                 .HasDefaultValue("Staff");
             entity.Property(e => e.Username).HasMaxLength(100);
+            entity.HasMany(e => e.Orders)
+       .WithOne(o => o.Employee)
+       .HasForeignKey(o => o.EmployeeId)
+       .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -133,6 +160,22 @@ public partial class QuanLiBanQuanAoContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict) // Không xóa Category khi xóa Product
                 .HasConstraintName("FK__Products__Catego__2C3393D0");
         });
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.HasOne(e => e.ObjectType)
+                .WithMany(ot => ot.Categories)
+                .HasForeignKey(e => e.ObjectTypeId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);  // Cho phép ObjectTypeId có thể NULL
+        });
+
+
 
         modelBuilder.Entity<ProductVariant>(entity =>
         {
@@ -144,6 +187,7 @@ public partial class QuanLiBanQuanAoContext : DbContext
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductVariants)
                 .HasForeignKey(d => d.ProductId)
+                //.IsRequired()
                 .OnDelete(DeleteBehavior.Cascade) // Xóa biến thể khi xóa sản phẩm
                 .HasConstraintName("FK_ProductVariant_Product");
         });
@@ -157,6 +201,20 @@ public partial class QuanLiBanQuanAoContext : DbContext
                 .HasDefaultValue("User");
             entity.Property(e => e.Username).HasMaxLength(100);
         });
+        // Quan hệ InventoryImport → ProductVariant (nhiều-nhiều)
+        modelBuilder.Entity<InventoryImport>()
+            .HasOne(ii => ii.ProductVariant)
+            .WithMany()
+            .HasForeignKey(ii => ii.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict); // hoặc Cascade tùy ý
+
+        // Quan hệ InventoryImport → Employee (nhiều-nhiều)
+        modelBuilder.Entity<InventoryImport>()
+            .HasOne(ii => ii.Employee)
+            .WithMany()
+            .HasForeignKey(ii => ii.EmployeeId)
+            .OnDelete(DeleteBehavior.Restrict); // hoặc Cascade tùy ý
+
 
         OnModelCreatingPartial(modelBuilder);
     }

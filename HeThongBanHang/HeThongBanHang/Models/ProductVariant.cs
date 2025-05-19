@@ -13,7 +13,7 @@ public partial class ProductVariant
 
     public int? Quantity { get; set; }
 
-    
-    public virtual Product? Product { get; set; }  // <-- Cho phép null
+
+    public virtual Product ?Product { get; set; }
 
 }

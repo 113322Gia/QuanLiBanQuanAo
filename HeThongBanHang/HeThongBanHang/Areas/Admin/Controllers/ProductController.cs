@@ -11,21 +11,21 @@ namespace HeThongBanHang.Areas.Admin.Controllers
     public class ProductController : BaseController
     {
         private readonly QuanLiBanQuanAoContext _DbContext; //biến _DbContext chứa instand của lớp đại diện Database
-        public  ProductController(QuanLiBanQuanAoContext context) // đây là 1 constructor
+        public ProductController(QuanLiBanQuanAoContext context) // đây là 1 constructor
         {
             _DbContext = context;
         }
         public IActionResult Index()
         {
-            
+
             return View();
         }
         public IActionResult Product_Index()
         {
-            
+
             var proDuct = _DbContext.Products
-                .Include(p=>p.Category)   //Loại sp
-                .Include(t=>t.ProductVariants) // biến thể size, giá , quantity
+                .Include(p => p.Category)   //Loại sp
+                .Include(t => t.ProductVariants) // biến thể size, giá , quantity
                 .ToList();
             return View(proDuct);
         }
@@ -59,22 +59,13 @@ namespace HeThongBanHang.Areas.Admin.Controllers
                     {
                         imageFile.CopyTo(stream);
                     }
-
                     proDuct.ImageUrl = "/Uploads/" + fileName;
                 }
-
-                
                 _DbContext.Add(proDuct);
-                _DbContext.SaveChanges();  
-
-                
-               
-
-                
+                _DbContext.SaveChanges();
                 TempData["SuccessMessage"] = "Product created successfully!";
                 return RedirectToAction("Product_Index");
             }
-
             // Nếu không hợp lệ, trả lại form với thông báo lỗi
             TempData["ErrorMessage"] = "There was an error creating the product. Please try again.";
             return View(proDuct);
@@ -101,7 +92,8 @@ namespace HeThongBanHang.Areas.Admin.Controllers
                 }).ToList();
 
             var proDuct = _DbContext.Products.Find(id);
-            if (proDuct == null) {
+            if (proDuct == null)
+            {
                 TempData["ErrorMessage"] = "Product not found";
             }
             return View(proDuct);
@@ -185,11 +177,17 @@ namespace HeThongBanHang.Areas.Admin.Controllers
                 TempData["ErrorMessage"] = "Sản phẩm không tồn tại.";
                 return RedirectToAction("Product_Index");
             }
+            bool existsInOrder = _DbContext.OrderItems.Any(oi => oi.ProductId == id);
+            if (existsInOrder)
+            {
+                TempData["ErrorMessage"] = "Không thể xóa sản phẩm vì đã có trong đơn hàng.";
+                return RedirectToAction("Product_Index");
+            }
             _DbContext.Products.Remove(proDuct);
             _DbContext.SaveChanges();
             TempData["SuccessMessage"] = "Deleted successfully";
             return RedirectToAction("Product_Index");
         }
-        
+
     }
 }

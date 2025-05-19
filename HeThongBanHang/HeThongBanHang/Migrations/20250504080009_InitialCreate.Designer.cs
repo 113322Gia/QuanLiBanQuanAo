@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HeThongBanHang.Migrations
 {
     [DbContext(typeof(QuanLiBanQuanAoContext))]
-    [Migration("20250423080314_SyncDatabase")]
-    partial class SyncDatabase
+    [Migration("20250504080009_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,6 +125,25 @@ namespace HeThongBanHang.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("HeThongBanHang.Models.CustomerEmployee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomerEmployee");
+                });
+
             modelBuilder.Entity("HeThongBanHang.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
@@ -132,6 +151,9 @@ namespace HeThongBanHang.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CustomerEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -158,7 +180,75 @@ namespace HeThongBanHang.Migrations
                     b.HasKey("Id")
                         .HasName("PK__Employee__3214EC0745A716B9");
 
+                    b.HasIndex("CustomerEmployeeId")
+                        .IsUnique()
+                        .HasFilter("[CustomerEmployeeId] IS NOT NULL");
+
                     b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("HeThongBanHang.Models.Favorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Favorite");
+                });
+
+            modelBuilder.Entity("HeThongBanHang.Models.HistoryInventory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ChangeDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangeType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("NewQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("QuantityChanged")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("HistoryInventory");
                 });
 
             modelBuilder.Entity("HeThongBanHang.Models.Order", b =>
@@ -180,6 +270,12 @@ namespace HeThongBanHang.Migrations
                     b.Property<int?>("EmployeeId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Status")
+                        .HasColumnType("int");
+
                     b.Property<decimal?>("TotalPrice")
                         .HasColumnType("decimal(18, 2)");
 
@@ -192,6 +288,8 @@ namespace HeThongBanHang.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("EmployeeId");
+
+                    b.HasIndex("PaymentId");
 
                     b.HasIndex("UserId");
 
@@ -231,6 +329,22 @@ namespace HeThongBanHang.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("HeThongBanHang.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PaymentName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Payment");
                 });
 
             modelBuilder.Entity("HeThongBanHang.Models.Product", b =>
@@ -278,7 +392,7 @@ namespace HeThongBanHang.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
+                    b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<string>("Size")
@@ -302,6 +416,9 @@ namespace HeThongBanHang.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -320,6 +437,8 @@ namespace HeThongBanHang.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK__Users__3214EC07662D925A");
+
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("Users");
                 });
@@ -357,6 +476,48 @@ namespace HeThongBanHang.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("HeThongBanHang.Models.Employee", b =>
+                {
+                    b.HasOne("HeThongBanHang.Models.CustomerEmployee", "CustomerEmployee")
+                        .WithOne("Employee")
+                        .HasForeignKey("HeThongBanHang.Models.Employee", "CustomerEmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("CustomerEmployee");
+                });
+
+            modelBuilder.Entity("HeThongBanHang.Models.Favorite", b =>
+                {
+                    b.HasOne("HeThongBanHang.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("HeThongBanHang.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HeThongBanHang.Models.HistoryInventory", b =>
+                {
+                    b.HasOne("HeThongBanHang.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId");
+
+                    b.HasOne("HeThongBanHang.Models.ProductVariant", "Productvariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Productvariant");
+                });
+
             modelBuilder.Entity("HeThongBanHang.Models.Order", b =>
                 {
                     b.HasOne("HeThongBanHang.Models.Customer", "Customer")
@@ -366,7 +527,12 @@ namespace HeThongBanHang.Migrations
                     b.HasOne("HeThongBanHang.Models.Employee", "Employee")
                         .WithMany("Orders")
                         .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK__Orders__Employee__38996AB5");
+
+                    b.HasOne("HeThongBanHang.Models.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
 
                     b.HasOne("HeThongBanHang.Models.User", "User")
                         .WithMany("Orders")
@@ -376,6 +542,8 @@ namespace HeThongBanHang.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Employee");
+
+                    b.Navigation("Payment");
 
                     b.Navigation("User");
                 });
@@ -408,6 +576,7 @@ namespace HeThongBanHang.Migrations
                     b.HasOne("HeThongBanHang.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK__Products__Catego__2C3393D0");
 
                     b.Navigation("Category");
@@ -418,10 +587,20 @@ namespace HeThongBanHang.Migrations
                     b.HasOne("HeThongBanHang.Models.Product", "Product")
                         .WithMany("ProductVariants")
                         .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_ProductVariant_Product");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("HeThongBanHang.Models.User", b =>
+                {
+                    b.HasOne("HeThongBanHang.Models.Customer", "Customers")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
+                    b.Navigation("Customers");
                 });
 
             modelBuilder.Entity("HeThongBanHang.Models.Cart", b =>
@@ -437,6 +616,11 @@ namespace HeThongBanHang.Migrations
             modelBuilder.Entity("HeThongBanHang.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("HeThongBanHang.Models.CustomerEmployee", b =>
+                {
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("HeThongBanHang.Models.Employee", b =>

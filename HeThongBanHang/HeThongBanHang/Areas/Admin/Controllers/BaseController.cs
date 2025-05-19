@@ -20,15 +20,15 @@ namespace HeThongBanHang.Areas.Admin.Controllers
             }
 
             if(role == "Employee") {
-                string actionName =     context.ActionDescriptor.RouteValues["action"]?.ToLower(); // Lấy tên action từ route
+                string actionName = context.ActionDescriptor.RouteValues["action"]?.ToLower(); // Lấy tên action từ route
                 Console.WriteLine($"ActionName: {actionName}");
 
-                var restrictedActions = new[] { "deleteproduct", "editproduct", "createproduct" };
+                var restrictedActions = new[] { "deleteproduct", "editproduct", "createproduct", "edit_employee", "delete_employee" };
 
                 if (restrictedActions.Contains(actionName))
                 {
                     TempData["ErrorMessage"] = "Bạn không có quyền thực hiện chức năng này.";
-                    context.Result = RedirectToAction("Product_Index", "Product", new { area = "Admin" });
+                    context.Result = RedirectToAction("Index", "HomeAdmin", new { area = "Admin" });
                     return;
                 }
             }

@@ -1,11 +1,33 @@
-﻿@model IPagedList<HeThongBanHang.Models.Product>
+﻿@functions {
+    bool IsFavorited(int productId)
+    {
+        var rawFavorites = ViewBag.Favorites;
+        if (rawFavorites != null)
+        {
+            var favoritesList = rawFavorites as List<int>; // ép kiểu list int từ danh sách favorite
+            if (favoritesList != null)
+            {
+                return favoritesList.Contains(productId);
+            }
+        }
+        return false;
+    }
+}
+
+
+
+@model IPagedList<HeThongBanHang.Models.Product>
 @using X.PagedList.Mvc.Core
 @using X.PagedList
+@using System.Linq
 
 @{
     ViewData["Title"] = "Home Page";
     var isCategoryPage = ViewData["CategoryId"] != null;
     var categoryId = ViewData["CategoryId"] as int?;
+    var selectedSizes = Context.Request.Query["sizes"].ToList();
+    var selectedCategoryIds = Context.Request.Query["categoryIds"].Select(int.Parse).ToList();
+    var categoryMap = ViewBag.CategoryMap as Dictionary<string, string>;
 }
 
 @* có tích hợp PartialView nên dùng viewdata *@
@@ -22,6 +44,118 @@
         height: 200px; /* Cố định chiều cao cho hình ảnh */
         object-fit: cover; /* Đảm bảo hình ảnh giữ tỷ lệ mà không bị vỡ hoặc kéo dãn */
     }
+
+    .fa-heart.active {
+        color: red !important; /* hoặc màu bạn muốn */
+    }
+
+    .filter-dropdown-container {
+        display: flex; /* Để các dropdown nằm trên cùng một hàng */
+        gap: 20px; /* Khoảng cách giữa các dropdown */
+        padding: 20px; /* Khoảng cách bên trong container */
+
+        border-bottom: 1px solid #eee; /* Đường kẻ dưới */
+    }
+
+    .filter-dropdown {
+        position: relative; /* Để định vị tuyệt đối cho menu */
+    }
+
+    .filter-btn {
+        background-color: #fff; /* Màu nền nút */
+        color: #333; /* Màu chữ nút */
+        padding: 10px 15px; /* Khoảng cách bên trong nút */
+        border: none; /* Loại bỏ viền nút */
+        border-radius: 5px; /* Góc bo tròn */
+        cursor: pointer; /* Biến con trỏ thành hình bàn tay khi di chuột qua */
+        display: flex; /* Để căn chỉnh mũi tên */
+        justify-content: space-between; /* Đẩy chữ và mũi tên ra xa nhau */
+        align-items: center; /* Căn chỉnh dọc ở giữa */
+    }
+
+        .filter-btn:hover {
+            background-color: #eee; /* Hiệu ứng hover nhẹ */
+        }
+
+    .filter-menu {
+        list-style: none;
+        padding: 10px 0;
+        margin: 0;
+        position: absolute;
+        top: 110%; /* Hiển thị dưới nút */
+        left: 0;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        z-index: 100;
+        min-width: 200px;
+        min-height: 120px; 
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+    }
+
+        .filter-menu.show {
+            display: block;
+        }
+
+        /* Style cho từng mục trong menu */
+        .filter-menu li {
+            padding: 8px 20px;
+        }
+
+            .filter-menu li label,
+            .filter-menu li button {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                font-size: 14px;
+                color: #333;
+                cursor: pointer;
+                border: none;
+                background: none;
+                padding: 5px 0;
+                transition: background-color 0.2s;
+            }
+
+            .filter-menu li:hover {
+                background-color: #f0f0f0;
+            }
+
+        /* Style input bên trong label */
+        .filter-menu input[type="checkbox"],
+        .filter-menu input[type="radio"] {
+            margin-right: 10px;
+            margin-top:-2px;
+        }
+
+    .selected-filters {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f7f7f7;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filter-tag {
+        background-color: #e0e0e0;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        position: relative;
+    }
+
+        .filter-tag .remove-tag {
+            margin-left: 6px;
+            text-decoration: none;
+            color: red;
+            font-weight: bold;
+        }
+
 </style>
 
 @if (TempData["SuccessMessage"] != null)
@@ -38,23 +172,110 @@
         <h2 class="title">@((isCategoryPage) ? "Products by Category" : "Latest Products")</h2>
     </div>
 </div>
-
-@if (Model == null || !Model.Any())
+@if (ViewBag.IsCategoryFallback == true)
 {
-    <div class="alert alert-warning">
-        @if (isCategoryPage)
-        {
-            <span>No products found in this category.</span>
-        }
-        else
-        {
-            <span>No products available.</span>
-        }
+    <div class="alert alert-info text-center">
+        Không có sản phẩm thuộc thể loại này.
     </div>
 }
-else
-{
+
+
+@* Lọc theo từng loại *@
+<form method="get" asp-action="Filter" asp-controller="Home" id="filterForm">
+    <div class="filter-dropdown-container">
+        <div class="filter-dropdown">
+            <div class="filter-btn" onclick="toggleDropdown(this)">SIZE ▾</div>
+            @await Component.InvokeAsync("SizeFilter", new { selectedSizes = Context.Request.Query["sizes"].ToList() })
+
+        </div>
+
+        <div class="filter-dropdown">
+            <div class="filter-btn" onclick="toggleDropdown(this)">CATEGORY ▾</div>
+            @await Component.InvokeAsync("CategoryFilter", new { selectedCategoryIds = Context.Request.Query["categoryIds"].Select(int.Parse).ToList() })
+
+        </div>
+
+        <div class="filter-dropdown">
+            <div class="filter-btn" onclick="toggleDropdown(this)">SORT BY ▾</div>
+            <ul class="filter-menu">
+                <li>
+                    <label>
+                        <input type="radio" name="sortBy" value="priceAsc" @(Context.Request.Query["sortBy"] == "priceAsc" ? "checked" : "") />
+
+                        Giá thấp -> cao
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="sortBy" value="priceDesc" @(Context.Request.Query["sortBy"] == "priceDesc" ? "checked" : "") />
+
+                        Giá cao -> thấp
+                    </label>
+                </li>
+            </ul>
+        </div>
+    </div>
+</form>
+@* Ô chứa từ khóa *@
+<div class="selected-filters">
+    <strong>Selected:</strong>
+
+    @foreach (var size in Context.Request.Query["sizes"])
+    {
+        // Tạo danh sách sizes mới trừ cái đang bị xoá
+        var remainingSizes = Context.Request.Query["sizes"]
+        .Where(s => s != size)
+        .ToArray();
+
+        <span class="filter-tag">
+            Size: @size
+            <a href="@Url.Action("Filter", "Home", new {
+            categoryIds = Context.Request.Query["categoryIds"],
+            sortBy = Context.Request.Query["sortBy"],
+            sizes = remainingSizes
+        })" class="remove-tag">x</a>
+        </span>
+    }
+
+
+    
+
+    @foreach (var catId in selectedCategoryIds)
+    {
+        var key = catId.ToString();
+        var categoryName = categoryMap != null && categoryMap.ContainsKey(key)
+        ? categoryMap[key]
+        : $"Category {key}";
+
+        <span class="filter-tag">
+            @categoryName
+            <a href="@Url.Action("Filter", "Home", new {
+            sizes = Context.Request.Query["sizes"].ToArray(),
+            categoryIds = selectedCategoryIds.Where(c => c != catId).ToArray(),
+            sortBy = Context.Request.Query["sortBy"].ToString()
+        })" class="remove-tag">x</a>
+        </span>
+    }
+
+
+
+    @if (!string.IsNullOrEmpty(Context.Request.Query["sortBy"]))
+    {
+        var label = Context.Request.Query["sortBy"] == "priceAsc" ? "Giá thấp -> cao" : "Giá cao -> thấp";
+        <span class="filter-tag">
+            @label
+            <a href="@Url.Action("Filter", "Home", new {
+                sizes = Context.Request.Query["sizes"],
+                categoryIds = Context.Request.Query["categoryIds"]
+            })" class="remove-tag">x</a>
+        </span>
+    }
+</div>
+
+@* Hiển thị danh sách *@
+<div id="product-list-wrapper">
     <div class="row" id="product-list">
+
         @foreach (var item in Model)
         {
             <div class="col-md-3 col-sm-6 col-xs-6">
@@ -64,7 +285,7 @@ else
                             <button class="main-btn quick-view">
                                 <i class="fa fa-search-plus"></i> Quick view
                             </button>
-                            <img src="@item.ImageUrl" alt="@item.Name" class="img-fluid product-image">
+                            <img src="@item.ImageUrl" alt="@item.Name" class="img-fluid product-image" />
                         </a>
                     </div>
 
@@ -78,23 +299,36 @@ else
                         </div>
                         <h2 class="product-name"><a href="#">@item.Name</a></h2>
 
-                        <form method="post" asp-controller="Cart" asp-action="AddToCart" asp-route-productId="@item.Id">
-                            @Html.AntiForgeryToken()
-                            <div class="product-btns">
-                                <button class="main-btn icon-btn"><i class="fa fa-heart"></i></button>
-                                <button class="main-btn icon-btn"><i class="fa fa-exchange"></i></button>
-                            </div>
-                        </form>
+                        <div class="product-btns">
+                            <button class="main-btn icon-btn" onclick="toggleFavorite(@item.Id)">
+                                <i id="heart-icon-@item.Id" class="fa fa-heart @(IsFavorited(item.Id) ? "active" : "")"></i>
+                            </button>
+                            <button class="main-btn icon-btn"><i class="fa fa-exchange"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
         }
-    </div>
 
-    <div class="col-md-12 text-center mt-4">
-        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, id = categoryId }))
     </div>
-}
+</div>
+@* nút trở về *@
+<div class="col-md-12 text-center mt-4" style="display: flex;flex-direction: row-reverse;">
+    <a href="@Url.Action("Index", "Home")" class="btn btn-primary"><i class="fa fa-arrow-left"></i> Back Home</a>
+</div>
+@* phân trang *@
+<div class="col-md-12 text-center mt-4">
+    @if (isCategoryPage && categoryId.HasValue)
+    {
+        @Html.PagedListPager(Model, page => Url.Action("ByCategory", new { page, id = categoryId, priceRange = ViewBag.PriceRange, size = ViewBag.Size, sortBy = ViewBag.SortBy }))
+    }
+    else
+    {
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, priceRange = ViewBag.PriceRange, size = ViewBag.Size, sortBy = ViewBag.SortBy }))
+    }
+</div>
+
+
 
 <script>
     function submitForm(productId) {
@@ -104,22 +338,81 @@ else
         }
     }
 
-
-   
     // scroll khi click vào thể loại
+               document.addEventListener("DOMContentLoaded", function () {
+        const path = window.location.pathname.toLowerCase();
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryId = urlParams.get('id');
+        const categoryIds = urlParams.get('categoryIds');
+        const size = urlParams.get('size');
+         const sizes = urlParams.get('sizes');
+        const priceRange = urlParams.get('priceRange');
+        const sortBy = urlParams.get('sortBy'); // Lấy giá trị của tham số 'sortBy'
 
-            document.addEventListener("DOMContentLoaded", function () {
-        const path = window.location.pathname.toLowerCase(); // Chuyển thành chữ thường để dễ so sánh, pathname là kiểu segment, search là kiểu query string ?id
-        console.log("Current path:", path); // In ra đường dẫn để kiểm tra
+        console.log("Current path:", path);
+        console.log("Category ID in URL:", categoryId);
+        console.log("Size in URL:", size);
+        console.log("Price Range in URL:", priceRange);
+        console.log("Sort By in URL:", sortBy); // In ra sortBy để kiểm tra
 
-        if (path === '/' || path.startsWith('/home/index') || path.includes('/home/bycategory/')) {
+        // Cuộn xuống product-list nếu đang ở trang chủ, trang danh mục, hoặc vừa lọc/sắp xếp
+        if (path === '/' || path.startsWith('/home/index') || path.startsWith('/home/bycategory/') || categoryId || categoryIds  || size || sizes || priceRange || sortBy) {
             const productList = document.getElementById('product-list');
             if (productList) {
                 productList.scrollIntoView({ behavior: 'smooth' });
             }
         }
     });
+    // JS sản phẩm yêu thích
+    function toggleFavorite(productId) {
+        var icon = document.getElementById("heart-icon-" + productId);
 
+        fetch('/User/Toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: productId.toString()
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            }
+
+            if (data.success) {
+                if (data.isFavorited) {
+                    icon.classList.add("active");
+                } else {
+                    icon.classList.remove("active");
+                }
+            } else {
+                alert("Đã xảy ra lỗi, vui lòng thử lại.");
+            }
+        });
+    }
+
+    //JS lọc sản phẩm nâng cao
+        
+    function toggleDropdown(el) {
+        el.nextElementSibling.classList.toggle("show");
+    }
+
+    // Tự động submit form khi chọn filter
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
+            input.addEventListener('change', () => {
+                document.querySelector('form').submit();
+            });
+        });
+    });
+
+    // Click outside to close
+    document.addEventListener("click", function (e) {
+        if (!e.target.closest(".filter-dropdown")) {
+            document.querySelectorAll(".filter-menu").forEach(m => m.classList.remove("show"));
+        }
+    });
 
 
 </script>

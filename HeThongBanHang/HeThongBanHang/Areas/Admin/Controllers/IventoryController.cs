@@ -84,25 +84,52 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
                 try
                 {
+                    var employeeId = HttpContext.Session.GetInt32("EmployeeId");
+                    if (employeeId == null)
+                    {
+                        TempData["ErrorMessage"] = "Không xác định được nhân viên!";
+                        return View(variant);
+                    }
+
+                    int initialQuantity = 0;
+                    int quantityChanged = variant.Quantity ?? 0;
+                    int newQuantity = 0;
+
                     var existingVariant = _DbContext.ProductVariants
                         .FirstOrDefault(v => v.ProductId == variant.ProductId && v.Size == variant.Size);
 
                     if (existingVariant != null)
                     {
-                        // Nếu đã có biến thể cùng Size, thì cộng dồn số lượng
-                        existingVariant.Quantity += variant.Quantity;
-
-                        // (Tùy chọn) Cập nhật giá nếu muốn
-                        // existingVariant.Price = variant.Price;
+                        initialQuantity = existingVariant.Quantity ?? 0;
+                        existingVariant.Quantity += quantityChanged;
+                        newQuantity = existingVariant.Quantity ?? 0;
 
                         _DbContext.ProductVariants.Update(existingVariant);
                     }
                     else
                     {
-                        // Nếu chưa có, thêm mới
+                        initialQuantity = 0;
+                        newQuantity = quantityChanged;
+
                         _DbContext.ProductVariants.Add(variant);
+                        _DbContext.SaveChanges(); // Lưu để lấy được variant.Id mới
                     }
 
+                    // Nếu vừa thêm mới, cần đảm bảo có Id để lưu vào InventoryImport
+                    var variantId = existingVariant?.Id ?? variant.Id;
+
+                    var importRecord = new InventoryImport
+                    {
+                        ProductVariantId = variantId,
+                        InitialQuantity = initialQuantity,
+                        QuantityChanged = quantityChanged,
+                        NewQuantity = newQuantity,
+                        EmployeeId = employeeId.Value,
+                        ChangeDate = DateTime.Now,
+                        Note = "Nhập kho"
+                    };
+
+                    _DbContext.InventoryImports.Add(importRecord);
                     _DbContext.SaveChanges();
 
                     TempData["SuccessMessage"] = "Thêm hoặc cập nhật biến thể thành công!";
@@ -118,6 +145,8 @@ namespace HeThongBanHang.Areas.Admin.Controllers
             TempData["ErrorMessage"] = "Lỗi khi thêm biến thể! (ModelState không hợp lệ)";
             return View(variant);
         }
+
+       
 
         public ActionResult UpdateStockQuantity(int orderId)
         {
@@ -199,46 +228,7 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
 
 
-        // Lọc sản phẩm trong tháng, năm, ngày
-        public JsonResult GetHistoryInventories(int? day, int? month, int? year, int id)
-        {
-            var historyQuery = _DbContext.HistoryInventory
-                .Include(o => o.Order)
-                .Include(o => o.Productvariant)
-                .ThenInclude(oi => oi.Product)
-                .Where(x => x.Productvariant.ProductId == id);
-
-            if (day.HasValue)
-            {
-                historyQuery = historyQuery.Where(h => h.ChangeDate.HasValue && h.ChangeDate.Value.Day == day.Value);
-            }
-            if (month.HasValue)
-            {
-                historyQuery = historyQuery.Where(h => h.ChangeDate.HasValue && h.ChangeDate.Value.Month == month.Value);
-            }
-            if (year.HasValue)
-            {
-                historyQuery = historyQuery.Where(h => h.ChangeDate.HasValue && h.ChangeDate.Value.Year == year.Value);
-            }
-
-            var history = historyQuery.OrderByDescending(x => x.ChangeDate)
-                                       .Select(h => new
-                                       {
-                                           ProductName = h.Productvariant.Product.Name,
-                                           ChangeDate = h.ChangeDate,
-                                           QuantityChanged = h.QuantityChanged,
-                                           NewQuantity = h.NewQuantity,
-                                           OrderId = h.OrderId
-                                       })
-                                       .ToList();
-
-            if (!history.Any())
-            {
-                return Json(new { success = false, message = "Không tìm thấy lịch sử thay đổi." });
-            }
-
-            return Json(new { success = true, data = history });
-        }
+       
 
     }
 }
