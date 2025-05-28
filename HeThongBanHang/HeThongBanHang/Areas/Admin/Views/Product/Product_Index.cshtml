@@ -6,6 +6,34 @@
     ViewData["Title"] = "Product_Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+<style>
+    .custom-dropdown select.form-select {
+        border-radius: 50px;
+        padding: 8px 16px;
+        border: 1px solid #007bff;
+        color: #007bff;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+        .custom-dropdown select.form-select:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 0.1rem rgba(0,123,255,0.25);
+            outline: none;
+        }
+
+    .custom-dropdown select {
+        min-width: 160px;
+        max-width: 100%;
+        cursor: pointer;
+        background-color: #fff;
+    }
+
+    .card {
+        width: 100%;
+        overflow-x: auto;
+    }
+</style>
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
@@ -15,34 +43,41 @@
     <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
 }
 
-
-
-
-
-
-
 <div class="card">
     <div class="card-body">
-        
-        <!-- Dùng Bootstrap Icons -->
-        <div class="d-flex justify-content-start mb-3">
-            <a class="btn btn-outline-success btn-sm px-3 py-2" asp-area="Admin" asp-controller="Product" asp-action="CreateProduct">
-                <i class="bi bi-plus-circle"></i> Create Product
-            </a>
+        <div class="row align-items-center mb-4">
+            @* Thêm align-items-center để căn giữa theo chiều dọc *@
+            <div class="col-md-6 d-flex justify-content-start">
+                <a class="btn btn-outline-primary btn-sm px-3 py-2 rounded-pill border-primary" asp-area="Admin" asp-controller="Product" asp-action="CreateProduct">
+                    <i class="bi bi-plus-circle"></i> Create Product
+                </a>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end">
+                @* Cột cho dropdown lọc, đẩy sang phải *@
+                <div class="custom-dropdown">
+                    <select class="form-select w-auto px-3 py-2 rounded-pill border-primary" id="quickFilterSelect">
+                        <option selected disabled hidden>Fast filtering</option>
+                        <option value="@Url.Action("Product_Index", new { filter = "" })">Tất cả sản phẩm</option> @* Thêm option để bỏ lọc *@
+                        <option value="@Url.Action("Product_Index", new { filter = "FavoriteProduct" })">Sản phẩm được yêu thích</option>
+                        <option value="@Url.Action("Product_Index", new { filter = "BestSellerProduct" })">Sản phẩm bán chạy</option>
+                        <option value="@Url.Action("Product_Index", new { filter = "UnsoldProduct" })">Sản phẩm không bán chạy</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
-
+        
         <div class="table-responsive">
 
             <table id="productTable" class="table table-bordered table-striped">
-                
+
                 <thead>
                     <tr>
                         <th> # </th>
                         <th> Name </th>
                         <th> Category </th>
                         <th> Image </th>
-                        <th> Price </th>                       
+                        <th> Price </th>
                         <th> Action </th>
                     </tr>
                 </thead>
@@ -52,12 +87,12 @@
                         <tr>
                             <td>@item.Id</td>
                             <td>@item.Name</td>
-                            <td>@item.Category.Name</td>
+                            <td>@item.Category?.Name</td>
                             <td class="text-center">
                                 <img src="@item.ImageUrl" style="width: 150px; height: 150px; object-fit: cover;" />
                             </td>
                             <td>@item.Price</td>
-                           
+
 
                             <td>
                                 <a asp-area="Admin" asp-controller="Product" asp-action="EditProduct" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
@@ -82,6 +117,14 @@
             perPage: 10,
             searchable: true,
             sortable: true
+        });
+
+        // JS lọc cho dropdown
+            document.getElementById('quickFilterSelect').addEventListener('change', function () {
+            const url = this.value;
+            if (url) {
+                window.location.href = url;
+            }
         });
     </script>
 }

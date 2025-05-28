@@ -4,7 +4,34 @@
     ViewData["Title"] = "Order_Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+<style>
+    .custom-dropdown select.form-select {
+        border-radius: 50px;
+        padding: 8px 16px;
+        border: 1px solid #007bff;
+        color: #007bff;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
 
+        .custom-dropdown select.form-select:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 0.1rem rgba(0,123,255,0.25);
+            outline: none;
+        }
+
+    .custom-dropdown select {
+        min-width: 160px;
+        max-width: 100%;
+        cursor: pointer;
+        background-color: #fff;
+    }
+
+    .card {
+        width: 100%;
+        overflow-x: auto;
+    }
+</style>
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>

@@ -1,5 +1,4 @@
 ﻿using HeThongBanHang.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -63,8 +62,8 @@ namespace HeThongBanHang.Areas.Admin.Controllers
                 employee.Role = model.Role;
                 employee.IsDeleted = model.IsDeleted;
 
-                if(employee.CustomerEmployee == null)
-{
+                if (employee.CustomerEmployee == null)
+                {
                     var newCustomerEmployee = new CustomerEmployee
                     {
                         Email = model.CustomerEmployee?.Email,
@@ -76,11 +75,11 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
                     _DbContext.CustomerEmployee.Add(newCustomerEmployee);
                 }
-                    else
+                else
                 {
                     employee.CustomerEmployee.Email = model.CustomerEmployee?.Email;
                     employee.CustomerEmployee.Phone = model.CustomerEmployee?.Phone;
-                    
+
                 }
 
                 _DbContext.SaveChanges();

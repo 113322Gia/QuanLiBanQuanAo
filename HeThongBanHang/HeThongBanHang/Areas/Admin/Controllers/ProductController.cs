@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 
 namespace HeThongBanHang.Areas.Admin.Controllers
@@ -20,14 +19,51 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
             return View();
         }
-        public IActionResult Product_Index()
+        public async Task<IActionResult> Product_Index(string? filter = null) 
         {
+            
+            IQueryable<Product> products = _DbContext.Products
+                .Include(p => p.Category)        
+                .Include(t => t.ProductVariants); 
+            ViewBag.CurrentFilter = filter;
+            switch (filter)
+            {
+                case "FavoriteProduct":
+                    var favoriteProductIds = await _DbContext.Favorite
+                                                    .Select(fp => fp.ProductId)
+                                                    .Distinct()
+                                                    .ToListAsync();
+                    products = products.Where(p => favoriteProductIds.Contains(p.Id));
+                    break;
 
-            var proDuct = _DbContext.Products
-                .Include(p => p.Category)   //Loại sp
-                .Include(t => t.ProductVariants) // biến thể size, giá , quantity
-                .ToList();
-            return View(proDuct);
+                case "BestSellerProduct":
+                    
+                    var bestSellerProductIds = await _DbContext.OrderItems
+                                                    .GroupBy(od => od.ProductId) //gom nhóm productId trong bảng orderitem 
+                                                    .Select(g => new { ProductId = g.Key, TotalQuantitySold = g.Sum(od => od.Quantity) })// tính tổng số lượng
+                                                    .OrderByDescending(x => x.TotalQuantitySold) // sắp xếp lại từ cao đến thấp
+                                                    .Take(10)  // xếp hạng 10 sản phẩm đầu tiên
+                                                    .Select(x => x.ProductId) // lấy productid từ 10 sản phẩm đó 
+                                                    .ToListAsync(); // trả về list 
+                    products = products.Where(p => bestSellerProductIds.Contains(p.Id));
+                    break;
+
+                case "UnsoldProduct":
+                    
+                    var soldProductIds = await _DbContext.OrderItems
+                                                .Select(od => od.ProductId)
+                                                .Distinct()
+                                                .ToListAsync();
+                    
+                    products = products.Where(p => !soldProductIds.Contains(p.Id));
+                    break;
+
+                default:
+                    
+                    break;
+            }
+            var productList = await products.ToListAsync();
+            return View(productList);
         }
 
         // thêm sản phẩm

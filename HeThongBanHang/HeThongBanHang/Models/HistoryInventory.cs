@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace HeThongBanHang.Models
+﻿namespace HeThongBanHang.Models
 {
     public class HistoryInventory
     {
         public int Id { get; set; }
         public int? ProductVariantId { get; set; }
         public string? ChangeType { get; set; }
-       
+
         public int? QuantityChanged { get; set; }
         public int? NewQuantity { get; set; }
         public DateTime? ChangeDate { get; set; }

@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HeThongBanHang.Models;
 using Microsoft.AspNetCore.Identity;
-using HeThongBanHang.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.CodeAnalysis.Scripting;
-using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HeThongBanHang.Controllers
 {
-    
+
 
     public class AuthController : Controller
     {
@@ -57,6 +54,8 @@ namespace HeThongBanHang.Controllers
             _DbContext.SaveChanges();
 
             TempData["SuccessMessage"] = "Đăng ký thành công. Vui lòng đăng nhập.";
+            TempData["NewUserId"] = user.Username;
+
             return RedirectToAction("Login_Auth");
         }
 

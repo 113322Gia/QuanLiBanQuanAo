@@ -1,17 +1,8 @@
-﻿using System.Diagnostics;
-using System.Net.NetworkInformation;
-using HeThongBanHang.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using HeThongBanHang.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList;
+using System.Diagnostics;
 using X.PagedList.Extensions;
-using System.Linq;
-using Azure;
-using System.Globalization;
-using System.Drawing;
-using System.Security.Policy;
 
 
 namespace HeThongBanHang.Controllers
@@ -21,7 +12,7 @@ namespace HeThongBanHang.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly QuanLiBanQuanAoContext _DbContext;
 
-        public HomeController(ILogger<HomeController> logger , QuanLiBanQuanAoContext context)
+        public HomeController(ILogger<HomeController> logger, QuanLiBanQuanAoContext context)
         {
             _logger = logger;
             _DbContext = context;
@@ -43,11 +34,12 @@ namespace HeThongBanHang.Controllers
             {
                 favoriteProductIds = _DbContext.Favorite
                     .Where(f => f.UserId == userId && f.ProductId.HasValue)
-                    .Select(f => f.ProductId.Value) // dụng value vì productid kiểu int? nullable
+                    .Select(f => f.ProductId!.Value) // dụng value vì productid kiểu int? nullable
                     .ToList(); // chuyển kết quả thành dạng list 
-            }                   
+            }
             ViewBag.Favorites = favoriteProductIds;
-
+            
+            
             return View(products);
         }
         [HttpGet]
@@ -69,7 +61,7 @@ namespace HeThongBanHang.Controllers
         {
             var product = _DbContext.Products
                 .Include(p => p.ProductVariants)
-                .FirstOrDefault(x=>x.Id == id);
+                .FirstOrDefault(x => x.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -130,7 +122,7 @@ namespace HeThongBanHang.Controllers
             // Lưu danh sách categories vào ViewData
             ViewData["Categories"] = categories;
             ViewData["ObjectTypeId"] = objectTypeId; // Lưu ObjectTypeId vào ViewData
-            
+
             return View("Index"); // Trả về View hiển thị danh sách Category
         }
 
@@ -141,7 +133,7 @@ namespace HeThongBanHang.Controllers
         {
             int pageSize = 12;
             var products = _DbContext.Products.AsQueryable();
-           
+
             // Lọc size nếu có
             if (sizes != null && sizes.Length > 0)
             {
@@ -192,6 +184,7 @@ namespace HeThongBanHang.Controllers
             return View("Index", pagedProducts);
         }
 
-
+        
+       
     }
 }

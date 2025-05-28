@@ -399,10 +399,11 @@
     }
 
     // Tự động submit form khi chọn filter
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
+        document.addEventListener("DOMContentLoaded", function () {
+        // Chỉ lắng nghe sự kiện trên các input bên trong form filter
+        document.querySelectorAll('#filterForm input[type="checkbox"], #filterForm input[type="radio"]').forEach(input => {
             input.addEventListener('change', () => {
-                document.querySelector('form').submit();
+                document.getElementById('filterForm').submit(); // Chỉ submit form có ID là 'filterForm'
             });
         });
     });

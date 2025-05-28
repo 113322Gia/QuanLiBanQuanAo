@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace HeThongBanHang.Models;
+﻿namespace HeThongBanHang.Models;
 
 public partial class ProductVariant
 {
@@ -14,6 +11,6 @@ public partial class ProductVariant
     public int? Quantity { get; set; }
 
 
-    public virtual Product ?Product { get; set; }
+    public virtual Product? Product { get; set; }
 
 }

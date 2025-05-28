@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace HeThongBanHang.Models;
 
@@ -40,6 +38,8 @@ public partial class QuanLiBanQuanAoContext : DbContext
     public virtual DbSet<Favorite> Favorite { get; set; }
     public virtual DbSet<InventoryImport> InventoryImports { get; set; }
     public virtual DbSet<ObjectType> ObjectType { get; set; }
+    public virtual DbSet<Branch> Branches { get; set; }
+    public virtual DbSet<InfoShop> InfoShop { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -215,6 +215,11 @@ public partial class QuanLiBanQuanAoContext : DbContext
             .HasForeignKey(ii => ii.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict); // hoặc Cascade tùy ý
 
+        modelBuilder.Entity<Branch>()
+            .HasOne(b => b.InfoShop)
+            .WithMany(s => s.Branches)
+            .HasForeignKey(b => b.ShopId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         OnModelCreatingPartial(modelBuilder);
     }

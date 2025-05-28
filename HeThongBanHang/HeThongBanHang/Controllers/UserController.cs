@@ -1,8 +1,6 @@
 ﻿using HeThongBanHang.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Bcpg;
 
 namespace HeThongBanHang.Controllers
 {
@@ -56,7 +54,6 @@ namespace HeThongBanHang.Controllers
         }
 
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateInfo(Customer model)
@@ -86,6 +83,7 @@ namespace HeThongBanHang.Controllers
 
                 // Gán CustomerId mới cho user
                 user.CustomerId = model.Id;
+                TempData["customerInfo"] = user.Username;
                 _DbContext.SaveChanges();
             }
             else
@@ -102,23 +100,24 @@ namespace HeThongBanHang.Controllers
                 customer.Address = model.Address;
                 customer.City = model.City;
                 customer.Tel = model.Tel;
-
+                
                 _DbContext.SaveChanges();
             }
 
             TempData["Success"] = "Cập nhật thành công!";
+            
             return RedirectToAction("UpdateInfo");
         }
 
-
+        // hàm xem lịch sử của khách hàng 
         public IActionResult HistoryOrder()
         {
             //Lấy id của khách hàng
             var userId = HttpContext.Session.GetInt32("UserId");
             // kiểm tra có userId không
-            if (userId == null) 
+            if (userId == null)
             {
-                TempData["ErrorMessage"] = "Bạn phải đăng nhập"; 
+                TempData["ErrorMessage"] = "Bạn phải đăng nhập";
                 return RedirectToAction("Login_Auth", "Auth");
             }
             var user = _DbContext.Users
@@ -131,7 +130,7 @@ namespace HeThongBanHang.Controllers
         }
 
         [HttpPost]
-        public IActionResult Toggle([FromBody] int productId)
+        public IActionResult Toggle([FromBody] int productId) // hàm yêu thích sản phẩm
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
@@ -177,7 +176,7 @@ namespace HeThongBanHang.Controllers
             {
                 return StatusCode(500, new { success = false, message = $"Đã xảy ra lỗi: {ex.Message}" });
             }
-        }
+        } 
 
 
 

@@ -1,5 +1,4 @@
-﻿using HeThongBanHang.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace HeThongBanHang.Areas.Admin.Controllers
@@ -8,7 +7,7 @@ namespace HeThongBanHang.Areas.Admin.Controllers
     //[Route("Admin/[controller]/[action]")]
     public class BaseController : Controller
     {
-        
+
         public override void OnActionExecuting(ActionExecutingContext context) //OnActionExecuting sẽ tự động chạy trước mỗi action
         {
             var employeeid = HttpContext.Session.GetInt32("EmployeeId");
@@ -19,7 +18,8 @@ namespace HeThongBanHang.Areas.Admin.Controllers
                 context.Result = RedirectToAction("Login", "Accout", new { area = "Admin" });
             }
 
-            if(role == "Employee") {
+            if (role == "Employee")
+            {
                 string actionName = context.ActionDescriptor.RouteValues["action"]?.ToLower(); // Lấy tên action từ route
                 Console.WriteLine($"ActionName: {actionName}");
 
@@ -39,6 +39,6 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
 
 
-        
+
     }
 }

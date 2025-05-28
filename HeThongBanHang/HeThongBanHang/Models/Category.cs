@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HeThongBanHang.Models;
 
@@ -10,7 +8,7 @@ public partial class Category
     [Required]
     public string Name { get; set; } = null!;
     public int? ObjectTypeId { get; set; }
-    public ObjectType ?ObjectType { get; set; }
+    public ObjectType? ObjectType { get; set; }
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

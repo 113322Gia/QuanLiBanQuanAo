@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HeThongBanHang.Models;
 using Microsoft.AspNetCore.Identity;
-using HeThongBanHang.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.CodeAnalysis.Scripting;
-using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HeThongBanHang.Areas.Admin.Controllers
 {
@@ -30,23 +27,23 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Register(string FullName, string Username, string Password, string ConfirmPassword , string Role)
+        public IActionResult Register(string FullName, string Username, string Password, string ConfirmPassword, string Role)
         {
             // so sánh password với confirmpassword
-            if(Password != ConfirmPassword)
+            if (Password != ConfirmPassword)
             {
                 TempData["ErrorMessage"] = "Mật khẩu chưa trùng khớp";
                 return RedirectToAction("Register");
             }
             // kiểm tra tài khoản trùng
-            var exitingEmployee = _DbContext.Employees.FirstOrDefault(x => x.Username ==Username);
-            if(exitingEmployee != null)
+            var exitingEmployee = _DbContext.Employees.FirstOrDefault(x => x.Username == Username);
+            if (exitingEmployee != null)
             {
                 TempData["ErrorMessage"] = "Tên tài khoản tồn tại";
                 return RedirectToAction("Register");
             }
 
-            var tempEmployee = new Employee { Username = Username}; 
+            var tempEmployee = new Employee { Username = Username };
             //mã hóa password
             var hashedPassword = _passwordHasher.HashPassword(tempEmployee, Password);
 
@@ -82,27 +79,33 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(string Username , string Password)
+        public IActionResult Login(string Username, string Password)
         {
-            var employee = _DbContext.Employees.FirstOrDefault(x => x.Username == Username);
-            if(employee ==null)
+            var employee = _DbContext.Employees.FirstOrDefault(x => x.Username == Username );
+            if (employee == null)
             {
                 TempData["ErrorMessage"] = "Tài khoản không tồn tại";
                 return RedirectToAction("Login");
             }
+            if (employee.IsDeleted == true) // kiểm tra nhân viên nếu đã nghỉ thì không cho đăng nhập
+            {
+                TempData["ErrorMessage"] = "Tài khoản này đã bị vô hiệu hóa";
+                return RedirectToAction("Login");
+            }
             var result = _passwordHasher.VerifyHashedPassword(employee, employee.PasswordHash, Password);
-            if(result == PasswordVerificationResult.Failed)
+            if (result == PasswordVerificationResult.Failed)
             {
                 TempData["ErrorMessage"] = "Mật khẩu không đúng";
                 return RedirectToAction("Login");
             }
-          
-          
+            
+            
+
             //lưu vào session
-                HttpContext.Session.SetInt32("EmployeeId", employee.Id);
-                HttpContext.Session.SetString("EmployeeName", employee.FullName);
-                HttpContext.Session.SetString("Role",employee.Role);
-                return RedirectToAction("Index", "HomeAdmin", new { area = "Admin" });         
+            HttpContext.Session.SetInt32("EmployeeId", employee.Id);
+            HttpContext.Session.SetString("EmployeeName", employee.FullName);
+            HttpContext.Session.SetString("Role", employee.Role);
+            return RedirectToAction("Index", "HomeAdmin", new { area = "Admin" });
         }
 
 

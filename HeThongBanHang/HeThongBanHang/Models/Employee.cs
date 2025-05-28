@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace HeThongBanHang.Models;
+﻿namespace HeThongBanHang.Models;
 
 public partial class Employee
 {
@@ -12,7 +8,7 @@ public partial class Employee
 
     public string Username { get; set; } = null!;
 
-    
+
     public string PasswordHash { get; set; } = null!;
 
     public string Role { get; set; } = null!;

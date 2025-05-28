@@ -1,8 +1,6 @@
 ﻿using HeThongBanHang.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HeThongBanHang.Areas.Admin.Controllers
 {
@@ -150,7 +148,7 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
 
 
-     
+
 
     }
 }

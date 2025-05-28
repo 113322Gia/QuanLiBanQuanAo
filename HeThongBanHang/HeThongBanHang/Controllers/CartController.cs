@@ -1,9 +1,8 @@
 ﻿using HeThongBanHang.Models;
+using HeThongBanHang.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Http;
-using HeThongBanHang.Services;
 
 namespace HeThongBanHang.Controllers
 {
@@ -378,10 +377,10 @@ namespace HeThongBanHang.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var order = _DbContext.Orders
+            var order = await _DbContext.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.ProductVariant)
-                .FirstOrDefault(o => o.Id == orderId.Value);
+                .FirstOrDefaultAsync(o => o.Id == orderId.Value);
 
             if (order == null)
             {
@@ -395,38 +394,29 @@ namespace HeThongBanHang.Controllers
                 return RedirectToAction("ViewInvoice", new { orderId = order.Id });
             }
 
-            // Kiểm tra trạng thái đơn hàng có phải là đang xử lý hoặc đã xác nhận
-            if (order.Status != 1 && order.Status != 4) // Chỉ cho hủy đơn Đang xử lý hoặc Vừa xác nhận
+            // Kiểm tra trạng thái đơn hàng trước khi hoàn trả tồn kho
+            if (order.Status != 1)
             {
-                TempData["ErrorMessage"] = "Không thể hủy đơn hàng ở trạng thái hiện tại.";
-                return RedirectToAction("ViewInvoice", new { orderId = order.Id });
-            }
-
-            // Cộng lại tồn kho
-            foreach (var item in order.OrderItems)
-            {
-                if (item.ProductVariant != null)
+                foreach (var item in order.OrderItems)
                 {
-                    // Kiểm tra nếu Quantity có giá trị null hay không
-                    int quantityChanged = item.Quantity ?? 0; // Sử dụng giá trị mặc định 0 nếu Quantity là null
-
-                    // Cập nhật tồn kho
-                    item.ProductVariant.Quantity = (item.ProductVariant.Quantity ?? 0) + quantityChanged;
-
-                    // Ghi lại lịch sử thay đổi tồn kho
-                    int newQuantity = item.ProductVariant.Quantity ?? 0;
-                    await LogInventoryChange(item.ProductVariant.Id, "Increase", quantityChanged, newQuantity, order.Id);
+                    if (item.ProductVariant != null)
+                    {
+                        int quantityChanged = item.Quantity ?? 0;
+                        item.ProductVariant.Quantity = (item.ProductVariant.Quantity ?? 0) + quantityChanged;
+                        int newQuantity = item.ProductVariant.Quantity ?? 0;
+                        await LogInventoryChange(item.ProductVariant.Id, "Increase", quantityChanged, newQuantity, order.Id);
+                    }
                 }
             }
 
-            // Cập nhật trạng thái đơn hàng
-            order.Status = 2; // Đã hủy
-            _DbContext.SaveChanges();
+            // Cập nhật trạng thái đơn hàng thành "Đã hủy" (2)
+            order.Status = 2;
+            await _DbContext.SaveChangesAsync();
 
             // Xóa thông tin đơn hàng trong session
             HttpContext.Session.Remove("LastOrderId");
 
-            TempData["SuccessMessage"] = "Đã hủy đơn hàng thành công và hoàn trả tồn kho.";
+            TempData["SuccessMessage"] = "Đã hủy đơn hàng thành công.";
             return RedirectToAction("ViewInvoice", new { orderId = order.Id });
         }
 

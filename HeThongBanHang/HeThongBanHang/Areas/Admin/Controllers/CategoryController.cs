@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 namespace HeThongBanHang.Areas.Admin.Controllers
 {
     public class CategoryController : BaseController
     {
         private readonly QuanLiBanQuanAoContext _DbContext;
-        
+
         public CategoryController(QuanLiBanQuanAoContext context)
         {
             _DbContext = context;
@@ -36,7 +35,7 @@ namespace HeThongBanHang.Areas.Admin.Controllers
         // Add category
         public IActionResult Create_Catgories()
         {
-            
+
             return View();
 
         }
@@ -65,7 +64,7 @@ namespace HeThongBanHang.Areas.Admin.Controllers
         //public IActionResult Edit_Catgories(int id)
         //{
         //    var category = _DbContext.Categories.Find(id);
-            
+
         //    return View(category);
 
         //}
@@ -80,17 +79,17 @@ namespace HeThongBanHang.Areas.Admin.Controllers
 
             }
             var category = _DbContext.Categories.FirstOrDefault(x => x.Id == cagories.Id);
-                if (category == null)
-                {
-                    TempData["ErrorMessage"] = "không tìm thấy thể loại";
-                    return View(category);
-                }
-                category.Name = cagories.Name;
-                category.ObjectTypeId = cagories.ObjectTypeId;
-                _DbContext.Categories.Update(category);
-                _DbContext.SaveChanges();
-                TempData["SuccessMessage"] = "Sửa thành công";
-            
+            if (category == null)
+            {
+                TempData["ErrorMessage"] = "không tìm thấy thể loại";
+                return View(category);
+            }
+            category.Name = cagories.Name;
+            category.ObjectTypeId = cagories.ObjectTypeId;
+            _DbContext.Categories.Update(category);
+            _DbContext.SaveChanges();
+            TempData["SuccessMessage"] = "Sửa thành công";
+
             return RedirectToAction("CateGories_Index");
 
         }

@@ -4,22 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HeThongBanHang.ViewComponents
 {
-
-    public class CategoryMenuViewComponent : ViewComponent
+    public class FooterViewComponent : ViewComponent
     {
         private readonly QuanLiBanQuanAoContext _DbContext;
-        public CategoryMenuViewComponent(QuanLiBanQuanAoContext context)
+        public FooterViewComponent(QuanLiBanQuanAoContext context)
         {
             _DbContext = context;
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var categories = await _DbContext.ObjectType
-                .Include(x => x.Categories)
+            var branches = await _DbContext.Branches
+                .Include(x => x.InfoShop)
                 .ToListAsync();
-            return View(categories);
+            return View(branches);
         }
     }
 }
-
-
